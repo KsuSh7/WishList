@@ -12,9 +12,9 @@
   font-style: normal;
 }
 @font-face {
-  font-family: 'Red Hat Display Bold';
+  font-family: 'Red Hat Display';
   src: url('./assets/fonts/RedHatDisplay-Bold.woff2') format('woff2');
-  font-weight: 400;
+  font-weight: bold;
   font-style: normal;
 }
 
@@ -53,7 +53,8 @@ button {
   border-radius: 20px;
   border: none;
   padding: 9px 4em 10px 4em;
-  font-family: 'Red Hat Display Bold';
+  font-family: 'Red Hat Display';
+  font-weight: bold;
   font-size: 1em;
   background-color: #B5838D;
   color: inherit;
@@ -62,5 +63,5 @@ button {
 }
 button:hover {
   background-color: #FFCDB2;
-  color: #B5838D;
+  color: #6D6875;
 }
