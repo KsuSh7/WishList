@@ -1,0 +1,10 @@
+.bgLogo {
+  position: fixed;
+  left: -50px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.1;
+  width: 200px;
+  pointer-events: none;
+  z-index: -1;
+}
