@@ -50,7 +50,7 @@ a:hover {
 }
 
 button {
-  border-radius: 30px;
+  border-radius: 20px;
   border: none;
   padding: 9px 4em 10px 4em;
   font-family: 'Red Hat Display Bold';
@@ -58,7 +58,9 @@ button {
   background-color: #B5838D;
   color: inherit;
   cursor: pointer;
+  color: #FFCDB2;
 }
 button:hover {
   background-color: #FFCDB2;
+  color: #B5838D;
 }

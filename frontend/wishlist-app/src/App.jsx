@@ -10,6 +10,7 @@ import WishlistPage from './pages/WishlistPage';
 function App() {
   return (
     <Router>
+      <BackgroundLogo />
       <div className="appContainer">
         <BackgroundLogo />
         <Header />

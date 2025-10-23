@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import styles from '../styles/Auth.module.css';
 
 export default function Auth() {
@@ -9,16 +8,34 @@ export default function Auth() {
     <div className={styles.authContainer}>
       <div className={styles.formBox}>
         <h2>{isLogin ? 'Login' : 'Register'}</h2>
-        {!isLogin && <input type="text" placeholder="Username" />}
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Password" />
-        <button>{isLogin ? 'Login' : 'Register'}</button>
-        <p>
-          {isLogin ? 'No account?' : 'Already have an account?'}{' '}
-          <span onClick={() => setIsLogin(!isLogin)} className={styles.toggle}>
-            {isLogin ? 'Register here' : 'Login here'}
-          </span>
-        </p>
+
+        {!isLogin && (
+          <div className={styles.inputGroup}>
+            <label>Username</label>
+            <input type="text" />
+          </div>
+        )}
+
+        <div className={styles.inputGroup}>
+          <label>Email</label>
+          <input type="email" />
+        </div>
+
+        <div className={styles.inputGroup}>
+          <label>Password</label>
+          <input type="password" />
+        </div>
+
+        <div className={styles.buttonsGroup}>
+            <button>Let's go</button>
+
+            <p>
+            {isLogin ? 'No account?' : 'Already have an account?'}{' '}
+            <span onClick={() => setIsLogin(!isLogin)} className={styles.toggle}>
+                {isLogin ? 'Register here' : 'Login here'}
+            </span>
+            </p>
+        </div>
       </div>
     </div>
   );
