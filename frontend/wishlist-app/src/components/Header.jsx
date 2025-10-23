@@ -9,8 +9,8 @@ export default function Header() {
         <img src={logo} alt="Wish Logo" className={styles.logoImage} />
       </div>
       <nav className={styles.nav}>
-        <Link to="/login" className={styles.navLink}>Login</Link>
-        <Link to="/signup" className={styles.navLink}>Sign up</Link>
+        <Link to="/auth" className={styles.navLink}>Login</Link>
+        <Link to="/auth" className={styles.navLink}>Sign up</Link>
         <Link to="/user" className={styles.icon}></Link>
       </nav>
     </header>

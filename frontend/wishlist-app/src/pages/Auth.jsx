@@ -7,7 +7,7 @@ export default function Auth() {
   return (
     <div className={styles.authContainer}>
       <div className={styles.formBox}>
-        <h2>{isLogin ? 'Login' : 'Register'}</h2>
+        <h2>{isLogin ? 'Login' : 'Sigh Up'}</h2>
 
         {!isLogin && (
           <div className={styles.inputGroup}>
@@ -32,7 +32,7 @@ export default function Auth() {
             <p>
             {isLogin ? 'No account?' : 'Already have an account?'}{' '}
             <span onClick={() => setIsLogin(!isLogin)} className={styles.toggle}>
-                {isLogin ? 'Register here' : 'Login here'}
+                {isLogin ? 'Sign up here' : 'Login here'}
             </span>
             </p>
         </div>

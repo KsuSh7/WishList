@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom'; // додано
+import { Link } from 'react-router-dom';
 import styles from '../styles/UserPage.module.css';
 import LeftArrow from '../assets/leftArrow.svg';
 import RightArrow from '../assets/rightArrow.svg';

@@ -1,5 +1,4 @@
 .container {
-  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
@@ -7,7 +6,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1;
 }
 
 .block {
@@ -17,6 +15,7 @@
   max-width: 413px; 
   height: 245px;
   text-align: center;
+  z-index: 1;
 }
 
 .title {
