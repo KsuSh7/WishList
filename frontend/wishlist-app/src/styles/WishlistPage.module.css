@@ -1,0 +1,111 @@
+.container {
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+.header {
+  margin-top: 147px;
+  text-align: center;
+  z-index: 1;
+}
+
+.title {
+  font-family: 'Great Vibes';
+  font-size: 48px;
+  margin: 0;
+  color: black;
+}
+
+.description {
+  margin-top: 0;
+}
+
+.itemsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  width: 100%;
+  max-width: 1200px;
+  z-index: 1;
+}
+
+.itemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  width: 335px;
+  height: 503px;
+}
+
+.itemImage {
+  width: 100%;
+  min-height: 436px;
+  background-color: #FFB4A2;
+  border-radius: 14px;
+}
+
+.itemInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.itemName {
+  font-size: 24px;
+  font-family: 'Red Hat Display';
+  font-weight: bold;
+  color: black;
+  margin: 0;
+}
+
+.itemPrice {
+  font-size: 16px;
+  color: black;
+  margin: 0;
+}
+
+.itemButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.viewButton {
+  font-size: 24px;
+  padding: 13px 40px 15px;
+}
+
+.deleteButton {
+  background-color: #FFCDB2;
+  padding: 15px 12px 11px;
+}
+
+.deleteButton:hover {
+  background-color: #B5838D;
+}
+
+.trashIcon {
+  width: 32px;
+}
+
+.deleteWishlist {
+  background-color: #FFCDB2;
+  color: #6D6875;
+  z-index: 1;
+}
+
+.deleteWishlist:hover {
+  background-color: #B5838D;
+  color: #FFCDB2;
+}

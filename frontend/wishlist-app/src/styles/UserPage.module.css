@@ -1,0 +1,157 @@
+.container {
+  padding: 66px; 
+  padding-top: 152px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.profile {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 32px;
+  position: relative;
+  height: 60vh;
+}
+
+.avatarBlock { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 15px; 
+}
+
+.avatarPlaceholder {
+  width: 235px;
+  height: 235px;
+  border-radius: 50%;
+  background-color: #FFB4A2;
+}
+
+.uploadLink {
+  text-decoration: underline;
+  color: black;
+}
+
+.userInfo {
+  flex: 1;
+  margin-left: 24px;
+  padding-top: 24px;
+}
+
+h2 {
+  margin: 0 0 22px 0;
+  font-size: 43px;
+  font-family: 'Great Vibes';
+  font-weight: normal;
+  z-index: 1;
+  text-align: center;
+}
+
+.userInfo h2 {
+    text-align: start !important;
+}
+
+.userInfo p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.wishlistsInfo {
+  display: flex;
+  flex-direction: column;
+  margin-left: 32px;
+}
+
+.count {
+  font-size: 24px !important;
+  font-family: 'Red Hat Display';
+  font-weight: bold;  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 24px;
+  width: 60px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  position: absolute;
+  right: 0;             
+  bottom: 0;
+}
+
+.actions button {
+  font-size: 24px;
+  width: 400px;
+}
+
+.newButton {
+    background-color: #FFCDB2;
+    color: #6D6875;
+}
+.newButton:hover {
+    background-color: #B5838D;
+    color: #FFCDB2;
+}
+
+.gallery {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  gap: 24px;
+}
+
+.wishlistList {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.wishlistCard {
+  display: flex;
+  flex-direction: column;
+  height: 519px;
+  width: 335px;
+}
+
+.wishlistImage {
+  width: 100%;
+  height: 436px;      
+  background-color: #FFB4A2;  
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.wishlistLabel {
+  margin-top: 8px;
+  text-align: left;
+  font-size: 16px;
+}
+
+.wishlistLabel {
+  margin-left: 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: black;
+  margin-bottom: 0;
+}
+
+.wishlistDescription {
+  font-size: 16px;
+  color: black;
+  max-width: 335px;
+  margin: 0;
+}
+
+.arrowIcon {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  flex-shrink: 0; 
+}

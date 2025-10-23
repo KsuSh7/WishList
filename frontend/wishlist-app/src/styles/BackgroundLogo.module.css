@@ -1,0 +1,9 @@
+.bgLogo {
+  position: fixed;
+  left: -100px;
+  bottom: -81px;
+  width: 1200px;
+  margin-top: 198px;
+  pointer-events: none;
+  z-index: 0;
+}
