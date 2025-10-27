@@ -1,0 +1,32 @@
+.container {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 413px; 
+  height: 245px;
+  text-align: center;
+  z-index: 1;
+}
+
+.title {
+    font-family: 'Great Vibes';
+    font-size: 64px;
+    font-weight: normal;
+    padding: 0;
+    margin: 0;
+}
+.subtitle {
+    margin: 0;
+    margin-bottom: 83px;
+    font-size: 16px;
+}
