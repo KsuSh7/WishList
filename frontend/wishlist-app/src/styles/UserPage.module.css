@@ -41,7 +41,7 @@
 }
 
 h2 {
-  margin: 0 0 22px 0;
+  margin: 100px 0 22px 0;
   font-size: 43px;
   font-family: 'Great Vibes';
   font-weight: normal;
@@ -51,6 +51,7 @@ h2 {
 
 .userInfo h2 {
     text-align: start !important;
+    margin-top: 0 !important;
 }
 
 .userInfo p {
@@ -92,6 +93,8 @@ h2 {
 .newButton {
     background-color: #FFCDB2;
     color: #6D6875;
+    transition: color 0.3s ease, background-color 0.3s ease;
+
 }
 .newButton:hover {
     background-color: #B5838D;

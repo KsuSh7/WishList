@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from '../styles/Auth.module.css';
+import { Link } from "react-router-dom";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,7 +28,9 @@ export default function Auth() {
         </div>
 
         <div className={styles.buttonsGroup}>
-            <button>Let's go</button>
+            <Link to="/user">
+                <button>Let's go</button>
+            </Link>
 
             <p>
             {isLogin ? 'No account?' : 'Already have an account?'}{' '}
