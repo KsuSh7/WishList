@@ -14,13 +14,19 @@ export default function Header() {
       <nav className={styles.nav}>
         {isAuthenticated ? (
           <>
-            <Link to="/" className={styles.navLink}>Logout</Link>
+            <Link to="/" className={styles.navLink}>
+              Logout
+            </Link>
             <Link to="/user" className={styles.icon}></Link>
           </>
         ) : (
           <>
-            <Link to="/auth" className={styles.navLink}>Login</Link>
-            <Link to="/auth" className={styles.navLink}>Sign up</Link>
+            <Link to="/auth" className={styles.navLink}>
+              Login
+            </Link>
+            <Link to="/auth" className={styles.navLink}>
+              Sign up
+            </Link>
           </>
         )}
       </nav>
