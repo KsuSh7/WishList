@@ -33,10 +33,13 @@ export default function WishlistPage() {
               </div>
               <div className={styles.itemButtons}>
                 <button className={styles.deleteButton}>
-                  <img src={TrashIcon} alt="Delete" className={styles.trashIcon} />
+                  <img
+                    src={TrashIcon}
+                    alt="Delete"
+                    className={styles.trashIcon}
+                  />
                 </button>
                 <button className={styles.viewButton}>View</button>
-
               </div>
             </div>
           </div>

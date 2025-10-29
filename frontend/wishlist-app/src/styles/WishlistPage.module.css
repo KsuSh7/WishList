@@ -89,6 +89,7 @@
 .deleteButton {
   background-color: #FFCDB2;
   padding: 15px 12px 11px;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 .deleteButton:hover {

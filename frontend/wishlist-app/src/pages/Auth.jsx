@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from '../styles/Auth.module.css';
+import { Link } from 'react-router-dom';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,14 +28,19 @@ export default function Auth() {
         </div>
 
         <div className={styles.buttonsGroup}>
+          <Link to="/user">
             <button>Let's go</button>
+          </Link>
 
-            <p>
+          <p>
             {isLogin ? 'No account?' : 'Already have an account?'}{' '}
-            <span onClick={() => setIsLogin(!isLogin)} className={styles.toggle}>
-                {isLogin ? 'Sign up here' : 'Login here'}
+            <span
+              onClick={() => setIsLogin(!isLogin)}
+              className={styles.toggle}
+            >
+              {isLogin ? 'Sign up here' : 'Login here'}
             </span>
-            </p>
+          </p>
         </div>
       </div>
     </div>

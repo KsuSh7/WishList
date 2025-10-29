@@ -60,6 +60,7 @@ button {
   color: inherit;
   cursor: pointer;
   color: #FFCDB2;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 button:hover {
   background-color: #FFCDB2;
