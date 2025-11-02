@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Auth from './pages/Auth';
 import UserPage from './pages/UserPage';
 import WishlistPage from './pages/WishlistPage';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/user" element={<UserPage />} />
           <Route path="/wishlist/:id" element={<WishlistPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>
