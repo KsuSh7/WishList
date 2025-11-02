@@ -7,24 +7,26 @@ import Auth from './pages/Auth';
 import UserPage from './pages/UserPage';
 import WishlistPage from './pages/WishlistPage';
 import NotFound from './pages/NotFound';
+import { AuthProvider } from './hooks/useAuth';
 
 function App() {
   return (
-    <Router>
-      <BackgroundLogo />
-      <div className="appContainer">
+    <AuthProvider>
+      <Router>
         <BackgroundLogo />
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/user" element={<UserPage />} />
-          <Route path="/wishlist/:id" element={<WishlistPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+        <div className="appContainer">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/user" element={<UserPage />} />
+            <Route path="/wishlist/:id" element={<WishlistPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

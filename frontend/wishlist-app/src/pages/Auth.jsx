@@ -1,14 +1,29 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/Auth.module.css';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await login(email, password);
+      navigate('/user');
+    } catch (err) {
+      console.error('Login failed', err);
+    }
+  };
 
   return (
     <div className={styles.authContainer}>
       <div className={styles.formBox}>
-        <h2>{isLogin ? 'Login' : 'Sigh Up'}</h2>
+        <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
 
         {!isLogin && (
           <div className={styles.inputGroup}>
@@ -19,18 +34,24 @@ export default function Auth() {
 
         <div className={styles.inputGroup}>
           <label>Email</label>
-          <input type="email" />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
 
         <div className={styles.inputGroup}>
           <label>Password</label>
-          <input type="password" />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
 
         <div className={styles.buttonsGroup}>
-          <Link to="/user">
-            <button>Let's go</button>
-          </Link>
+          <button onClick={handleSubmit}>Let's go</button>
 
           <p>
             {isLogin ? 'No account?' : 'Already have an account?'}{' '}
