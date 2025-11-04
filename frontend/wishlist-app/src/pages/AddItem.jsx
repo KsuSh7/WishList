@@ -6,7 +6,7 @@ export default function AddItem() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { title, description } = location.state || {};
+  const { title, description, wishlistId } = location.state || {};
 
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
@@ -18,13 +18,12 @@ export default function AddItem() {
     if (!name.trim() || !price.trim() || !link.trim()) return;
 
     setItems((prev) => [...prev, { name, price, link }]);
-
     setName('');
     setPrice('');
     setLink('');
   };
 
-  const handleCreateWishlist = async (e) => {
+  const handleCreateOrUpdateWishlist = async (e) => {
     e.preventDefault();
 
     try {
@@ -33,24 +32,31 @@ export default function AddItem() {
         finalItems.push({ name, price, link });
       }
 
-      const res = await fetch('http://localhost:5000/wishlists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description }),
-      });
-      const newWishlist = await res.json();
+      let currentWishlistId = wishlistId;
 
+      // Якщо створюємо новий wishlist (наприклад, прийшли з AddWishlist)
+      if (!currentWishlistId) {
+        const res = await fetch('http://localhost:5000/wishlists', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description }),
+        });
+        const newWishlist = await res.json();
+        currentWishlistId = newWishlist.id;
+      }
+
+      // Додаємо айтеми до вішліста
       for (const item of finalItems) {
         await fetch('http://localhost:5000/items', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...item, wishlistId: newWishlist.id }),
+          body: JSON.stringify({ ...item, wishlistId: currentWishlistId }),
         });
       }
 
-      navigate('/user');
+      navigate(`/wishlist/${currentWishlistId}`);
     } catch (err) {
-      console.error('Error creating wishlist:', err);
+      console.error('Error creating/updating wishlist:', err);
     }
   };
 
@@ -98,7 +104,7 @@ export default function AddItem() {
         <div className={styles.buttonGroup}>
           <button onClick={handleAddAnother}>Add more items</button>
           <button
-            onClick={handleCreateWishlist}
+            onClick={handleCreateOrUpdateWishlist}
             className={styles.addFinalItemButton}
           >
             Done

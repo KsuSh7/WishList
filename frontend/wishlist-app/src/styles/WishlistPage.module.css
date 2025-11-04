@@ -104,10 +104,16 @@
 .deleteWishlist {
   background-color: #FFCDB2;
   color: #6D6875;
-  z-index: 1;
 }
 
 .deleteWishlist:hover {
   background-color: #B5838D;
   color: #FFCDB2;
+}
+
+.buttonsGroup {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    align-items: center;
 }

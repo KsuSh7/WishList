@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import styles from '../styles/WishlistPage.module.css';
 import TrashIcon from '../assets/trash.svg';
 import { useAuth } from '../hooks/useAuth';
@@ -92,12 +92,26 @@ export default function WishlistPage() {
       </div>
 
       {isAuthenticated && (
-        <button
-          className={styles.deleteWishlist}
-          onClick={handleDeleteWishlist}
-        >
-          Delete Wishlist
-        </button>
+        <div className={styles.buttonsGroup}>
+          <Link
+            to={'/add-item'}
+            state={{
+              wishlistId: id,
+              title: wishlist.title,
+              description: wishlist.description,
+            }}
+            className={styles.addItemButton}
+          >
+            <button>Add Items</button>
+          </Link>
+
+          <button
+            className={styles.deleteWishlist}
+            onClick={handleDeleteWishlist}
+          >
+            Delete Wishlist
+          </button>
+        </div>
       )}
     </div>
   );
