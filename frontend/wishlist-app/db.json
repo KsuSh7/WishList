@@ -1,8 +1,10 @@
 {
   "wishlists": [
-    { "id": 1, "title": "Birthday gifts", "description": "Ideas for my birthday" }
+    {
+      "id": "e086",
+      "title": "",
+      "description": ""
+    }
   ],
-  "items": [
-    { "id": 1, "wishlistId": 1, "name": "Book", "price": 15, "link": "https://example.com/book" }
-  ]
+  "items": []
 }

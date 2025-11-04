@@ -1,51 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/UserPage.module.css';
 import LeftArrow from '../assets/leftArrow.svg';
 import RightArrow from '../assets/rightArrow.svg';
+import { useAuth } from '../hooks/useAuth';
 
 export default function UserPage() {
-  const [wishlists, setWishlists] = useState([
-    {
-      id: 1,
-      name: 'Wishlist 1',
-      description: 'This is a sample description for wishlist 1.',
-    },
-    {
-      id: 2,
-      name: 'Wishlist 2',
-      description: 'This is a sample description for wishlist 2.',
-    },
-    {
-      id: 3,
-      name: 'Wishlist 3',
-      description: 'This is a sample description for wishlist 3.',
-    },
-    {
-      id: 4,
-      name: 'Wishlist 4',
-      description: 'This is a sample description for wishlist 4.',
-    },
-    {
-      id: 5,
-      name: 'Wishlist 5',
-      description: 'This is a sample description for wishlist 5.',
-    },
-    {
-      id: 6,
-      name: 'Wishlist 6',
-      description: 'This is a sample description for wishlist 6.',
-    },
-  ]);
-
+  const { isAuthenticated, user } = useAuth();
+  const [wishlists, setWishlists] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 3;
+
+  useEffect(() => {
+    fetch('http://localhost:5000/wishlists')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load wishlists');
+        return res.json();
+      })
+      .then((data) => setWishlists(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
     setStartIndex((prev) =>
-      Math.min(prev + 1, wishlists.length - visibleCount)
+      Math.min(prev + 1, Math.max(0, wishlists.length - visibleCount))
     );
+
+  const handleShare = () => {
+    const baseUrl = window.location.origin;
+    const shareLink = `${baseUrl}/user/${user?.id || 'guest'}/public`;
+
+    navigator.clipboard
+      .writeText(shareLink)
+      .then(() => alert('Link copied to clipboard!'))
+      .catch(() => alert('Failed to copy link'));
+  };
 
   const visibleWishlists = wishlists.slice(
     startIndex,
@@ -57,9 +47,11 @@ export default function UserPage() {
       <div className={styles.profile}>
         <div className={styles.avatarBlock}>
           <div className={styles.avatarPlaceholder}></div>
-          <a href="#" className={styles.uploadLink}>
-            Add picture
-          </a>
+          {isAuthenticated && (
+            <a href="#" className={styles.uploadLink}>
+              Add picture
+            </a>
+          )}
         </div>
 
         <div className={styles.userInfo}>
@@ -70,13 +62,20 @@ export default function UserPage() {
           </div>
         </div>
 
-        <div className={styles.actions}>
-          <button className={styles.newButton}>Make a new wish</button>
-          <button>Share my page</button>
-        </div>
+        {isAuthenticated && (
+          <div className={styles.actions}>
+            <Link to="/add-wishlist">
+              <button className={styles.newButton}>Make a new wish</button>
+            </Link>
+            <button className={styles.shareButton} onClick={handleShare}>
+              Share my page
+            </button>
+          </div>
+        )}
       </div>
 
       <h2>My wishlists</h2>
+
       <div className={styles.gallery}>
         <img
           src={LeftArrow}
@@ -91,7 +90,7 @@ export default function UserPage() {
               <Link to={`/wishlist/${wl.id}`} className={styles.wishlistLink}>
                 <div className={styles.wishlistImage}></div>
               </Link>
-              <p className={styles.wishlistLabel}>{wl.name}</p>
+              <p className={styles.wishlistLabel}>{wl.title}</p>
               <p className={styles.wishlistDescription}>{wl.description}</p>
             </div>
           ))}

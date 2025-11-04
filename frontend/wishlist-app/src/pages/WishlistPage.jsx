@@ -1,52 +1,104 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../styles/WishlistPage.module.css';
 import TrashIcon from '../assets/trash.svg';
+import { useAuth } from '../hooks/useAuth';
 
 export default function WishlistPage() {
-  const wishlist = {
-    name: 'Wishlist 1',
-    description: 'This is a sample description for wishlist 1.',
-    items: [
-      { id: 1, name: 'Item 1', price: '$25.00' },
-      { id: 2, name: 'Item 2', price: '$18.50' },
-      { id: 3, name: 'Item 3', price: '$40.00' },
-      { id: 4, name: 'Item 4', price: '$12.00' },
-      { id: 5, name: 'Item 5', price: '$55.00' },
-      { id: 6, name: 'Item 6', price: '$30.00' },
-    ],
-  };
+  const { isAuthenticated } = useAuth();
+  const [wishlist, setWishlist] = useState(null);
+  const [items, setItems] = useState([]);
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/wishlists/${id}`)
+      .then((res) => res.json())
+      .then((data) => setWishlist(data))
+      .catch((err) => console.error('Error loading wishlist:', err));
+
+    fetch(`http://localhost:5000/items?wishlistId=${id}`)
+      .then((res) => res.json())
+      .then((data) => setItems(data))
+      .catch((err) => console.error('Error loading items:', err));
+  }, [id]);
+
+  if (!wishlist) return <p>Loading...</p>;
+
+  function handleDeleteItem(itemId) {
+    fetch(`http://localhost:5000/items/${itemId}`, { method: 'DELETE' })
+      .then(() => setItems((prev) => prev.filter((i) => i.id !== itemId)))
+      .catch((err) => console.error('Delete failed:', err));
+  }
+
+  function handleDeleteWishlist() {
+    if (window.confirm('Are you sure you want to delete this wishlist?')) {
+      fetch(`http://localhost:5000/wishlists/${id}`, { method: 'DELETE' })
+        .then(() =>
+          fetch(`http://localhost:5000/items?wishlistId=${id}`)
+            .then((res) => res.json())
+            .then((relatedItems) => {
+              relatedItems.forEach((item) => {
+                fetch(`http://localhost:5000/items/${item.id}`, {
+                  method: 'DELETE',
+                });
+              });
+            })
+        )
+        .then(() => navigate('/user'))
+        .catch((err) => console.error('Delete wishlist failed:', err));
+    }
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>{wishlist.name}</h2>
+        <h2 className={styles.title}>{wishlist.title}</h2>
         <p className={styles.description}>{wishlist.description}</p>
       </div>
 
       <div className={styles.itemsGrid}>
-        {wishlist.items.map((item) => (
+        {items.map((item) => (
           <div key={item.id} className={styles.itemCard}>
             <div className={styles.itemImage}></div>
             <div className={styles.itemInfo}>
               <div className={styles.textBlock}>
                 <p className={styles.itemName}>{item.name}</p>
-                <p className={styles.itemPrice}>{item.price}</p>
+                <p className={styles.itemPrice}>${item.price}</p>
               </div>
               <div className={styles.itemButtons}>
-                <button className={styles.deleteButton}>
-                  <img
-                    src={TrashIcon}
-                    alt="Delete"
-                    className={styles.trashIcon}
-                  />
+                {isAuthenticated && (
+                  <button
+                    className={styles.deleteButton}
+                    onClick={() => handleDeleteItem(item.id)}
+                  >
+                    <img
+                      src={TrashIcon}
+                      alt="Delete"
+                      className={styles.trashIcon}
+                    />
+                  </button>
+                )}
+                <button
+                  className={styles.viewButton}
+                  onClick={() => window.open(item.link, '_blank')}
+                >
+                  View
                 </button>
-                <button className={styles.viewButton}>View</button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <button className={styles.deleteWishlist}>Delete Wishlist</button>
+      {isAuthenticated && (
+        <button
+          className={styles.deleteWishlist}
+          onClick={handleDeleteWishlist}
+        >
+          Delete Wishlist
+        </button>
+      )}
     </div>
   );
 }

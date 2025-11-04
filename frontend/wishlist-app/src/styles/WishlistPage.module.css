@@ -4,6 +4,7 @@
   flex-direction: column;
   align-items: center;
   gap: 48px;
+  height: 100vh;
 }
 
 .header {

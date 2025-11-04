@@ -12,6 +12,16 @@ export default function Auth() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+
     try {
       await login(email, password);
       navigate('/user');
