@@ -1,52 +1,61 @@
-import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import styles from '../styles/WishlistPage.module.css';
 import TrashIcon from '../assets/trash.svg';
 import { useAuth } from '../hooks/useAuth';
+import useFetchData from '../hooks/useFetchData';
 
 export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
-  const [wishlist, setWishlist] = useState(null);
-  const [items, setItems] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/wishlists/${id}`)
-      .then((res) => res.json())
-      .then((data) => setWishlist(data))
-      .catch((err) => console.error('Error loading wishlist:', err));
+  const {
+    data: wishlist,
+    loading: wishlistLoading,
+    error: wishlistError,
+  } = useFetchData(`http://localhost:5000/wishlists/${id}`);
 
-    fetch(`http://localhost:5000/items?wishlistId=${id}`)
-      .then((res) => res.json())
-      .then((data) => setItems(data))
-      .catch((err) => console.error('Error loading items:', err));
-  }, [id]);
+  const {
+    data: items,
+    loading: itemsLoading,
+    error: itemsError,
+  } = useFetchData(`http://localhost:5000/items?wishlistId=${id}`);
 
-  if (!wishlist) return <p>Loading...</p>;
+  if (wishlistLoading || itemsLoading) return <p>Loading...</p>;
+  if (wishlistError || itemsError)
+    return <p>Error loading data: {wishlistError || itemsError}</p>;
+  if (!wishlist) return <p>Wishlist not found</p>;
 
-  function handleDeleteItem(itemId) {
-    fetch(`http://localhost:5000/items/${itemId}`, { method: 'DELETE' })
-      .then(() => setItems((prev) => prev.filter((i) => i.id !== itemId)))
-      .catch((err) => console.error('Delete failed:', err));
+  async function handleDeleteItem(itemId) {
+    try {
+      await fetch(`http://localhost:5000/items/${itemId}`, {
+        method: 'DELETE',
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error('Delete failed:', err);
+    }
   }
 
-  function handleDeleteWishlist() {
+  async function handleDeleteWishlist() {
     if (window.confirm('Are you sure you want to delete this wishlist?')) {
-      fetch(`http://localhost:5000/wishlists/${id}`, { method: 'DELETE' })
-        .then(() =>
-          fetch(`http://localhost:5000/items?wishlistId=${id}`)
-            .then((res) => res.json())
-            .then((relatedItems) => {
-              relatedItems.forEach((item) => {
-                fetch(`http://localhost:5000/items/${item.id}`, {
-                  method: 'DELETE',
-                });
-              });
-            })
-        )
-        .then(() => navigate('/user'))
-        .catch((err) => console.error('Delete wishlist failed:', err));
+      try {
+        await fetch(`http://localhost:5000/wishlists/${id}`, {
+          method: 'DELETE',
+        });
+
+        const res = await fetch(`http://localhost:5000/items?wishlistId=${id}`);
+        const relatedItems = await res.json();
+        for (const item of relatedItems) {
+          await fetch(`http://localhost:5000/items/${item.id}`, {
+            method: 'DELETE',
+          });
+        }
+
+        navigate('/user');
+      } catch (err) {
+        console.error('Delete wishlist failed:', err);
+      }
     }
   }
 
@@ -58,43 +67,47 @@ export default function WishlistPage() {
       </div>
 
       <div className={styles.itemsGrid}>
-        {items.map((item) => (
-          <div key={item.id} className={styles.itemCard}>
-            <div className={styles.itemImage}></div>
-            <div className={styles.itemInfo}>
-              <div className={styles.textBlock}>
-                <p className={styles.itemName}>{item.name}</p>
-                <p className={styles.itemPrice}>${item.price}</p>
-              </div>
-              <div className={styles.itemButtons}>
-                {isAuthenticated && (
+        {items && items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.id} className={styles.itemCard}>
+              <div className={styles.itemImage}></div>
+              <div className={styles.itemInfo}>
+                <div className={styles.textBlock}>
+                  <p className={styles.itemName}>{item.name}</p>
+                  <p className={styles.itemPrice}>${item.price}</p>
+                </div>
+                <div className={styles.itemButtons}>
+                  {isAuthenticated && (
+                    <button
+                      className={styles.deleteButton}
+                      onClick={() => handleDeleteItem(item.id)}
+                    >
+                      <img
+                        src={TrashIcon}
+                        alt="Delete"
+                        className={styles.trashIcon}
+                      />
+                    </button>
+                  )}
                   <button
-                    className={styles.deleteButton}
-                    onClick={() => handleDeleteItem(item.id)}
+                    className={styles.viewButton}
+                    onClick={() => window.open(item.link, '_blank')}
                   >
-                    <img
-                      src={TrashIcon}
-                      alt="Delete"
-                      className={styles.trashIcon}
-                    />
+                    View
                   </button>
-                )}
-                <button
-                  className={styles.viewButton}
-                  onClick={() => window.open(item.link, '_blank')}
-                >
-                  View
-                </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className={styles.noItems}>No items yet</p>
+        )}
       </div>
 
       {isAuthenticated && (
         <div className={styles.buttonsGroup}>
           <Link
-            to={'/add-item'}
+            to="/add-item"
             state={{
               wishlistId: id,
               title: wishlist.title,

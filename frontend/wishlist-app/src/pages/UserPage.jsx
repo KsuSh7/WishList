@@ -1,25 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/UserPage.module.css';
 import LeftArrow from '../assets/leftArrow.svg';
 import RightArrow from '../assets/rightArrow.svg';
 import { useAuth } from '../hooks/useAuth';
+import useFetchData from '../hooks/useFetchData';
 
 export default function UserPage() {
-  const { isAuthenticated, user } = useAuth();
-  const [wishlists, setWishlists] = useState([]);
+  const { isAuthenticated } = useAuth();
   const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 3;
 
-  useEffect(() => {
-    fetch('http://localhost:5000/wishlists')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load wishlists');
-        return res.json();
-      })
-      .then((data) => setWishlists(data))
-      .catch((err) => console.error(err));
-  }, []);
+  const {
+    data: wishlists = [],
+    loading,
+    error,
+  } = useFetchData('http://localhost:5000/wishlists');
 
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
@@ -30,7 +26,6 @@ export default function UserPage() {
   const handleShare = () => {
     const baseUrl = window.location.origin;
     const shareLink = `${baseUrl}/user`;
-
     navigator.clipboard
       .writeText(shareLink)
       .then(() => alert('Link copied to clipboard!'))
@@ -42,6 +37,9 @@ export default function UserPage() {
     startIndex + visibleCount
   );
   const showArrows = wishlists.length > visibleCount;
+
+  if (loading) return <p>Loading wishlists...</p>;
+  if (error) return <p>Error loading wishlists: {error}</p>;
 
   return (
     <div className={styles.container}>

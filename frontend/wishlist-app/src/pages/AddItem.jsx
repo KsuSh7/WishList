@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/AddWishlist.module.css';
+import useWishlistManager from '../hooks/useWishlistManager';
 
 export default function AddItem() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { createOrUpdateWishlist, loading, error } = useWishlistManager();
 
   const { title, description, wishlistId } = location.state || {};
-
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -23,41 +24,20 @@ export default function AddItem() {
     setLink('');
   };
 
-  const handleCreateOrUpdateWishlist = async (e) => {
+  const handleDone = async (e) => {
     e.preventDefault();
-
-    try {
-      const finalItems = [...items];
-      if (name.trim() && price.trim() && link.trim()) {
-        finalItems.push({ name, price, link });
-      }
-
-      let currentWishlistId = wishlistId;
-
-      // Якщо створюємо новий wishlist (наприклад, прийшли з AddWishlist)
-      if (!currentWishlistId) {
-        const res = await fetch('http://localhost:5000/wishlists', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, description }),
-        });
-        const newWishlist = await res.json();
-        currentWishlistId = newWishlist.id;
-      }
-
-      // Додаємо айтеми до вішліста
-      for (const item of finalItems) {
-        await fetch('http://localhost:5000/items', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...item, wishlistId: currentWishlistId }),
-        });
-      }
-
-      navigate(`/wishlist/${currentWishlistId}`);
-    } catch (err) {
-      console.error('Error creating/updating wishlist:', err);
+    const finalItems = [...items];
+    if (name.trim() && price.trim() && link.trim()) {
+      finalItems.push({ name, price, link });
     }
+
+    const id = await createOrUpdateWishlist({
+      title,
+      description,
+      wishlistId,
+      items: finalItems,
+    });
+    if (id) navigate(`/wishlist/${id}`);
   };
 
   return (
@@ -103,10 +83,7 @@ export default function AddItem() {
 
         <div className={styles.buttonGroup}>
           <button onClick={handleAddAnother}>Add more items</button>
-          <button
-            onClick={handleCreateOrUpdateWishlist}
-            className={styles.addFinalItemButton}
-          >
+          <button onClick={handleDone} className={styles.addFinalItemButton}>
             Done
           </button>
         </div>
