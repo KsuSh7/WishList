@@ -35,6 +35,7 @@
 
 h2 {
     margin-top: 160px;
+    margin-bottom: 6px;
 }
 
 .rightColumn {
@@ -49,18 +50,24 @@ h2 {
 .inputGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: 25px;
+  margin-bottom: 40px;
   width: 100%;
 }
 
-.inputGroup label {
+.inputGroupItems {
+    display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+label {
   align-items: start;
   margin-bottom: 6px;
   font-size: 14px;
   color: #000;
 }
 
-.inputGroup input {
+input {
   align-items: center;  
   background-color: #FFCDB2;
   width: 100%;
@@ -75,8 +82,13 @@ h2 {
   width: 100%;
 }
 
-.addItemButton {
-    width: 220px;
+.itemsInput {
+    margin-bottom: 27px !important;
+}
+
+button {
+    font-size: 24px;
+    margin: 6px;
 }
 
 .backLink {
@@ -89,4 +101,20 @@ h2 {
 }
 .backLink:hover {
   color: #FFCDB2;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.addFinalItemButton {
+    background-color: #FFCDB2;
+    color: #6D6875;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.addFinalItemButton:hover {
+    background-color: #B5838D;
+    color: #FFCDB2;
 }

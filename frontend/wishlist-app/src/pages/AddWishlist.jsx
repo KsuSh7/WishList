@@ -7,19 +7,13 @@ export default function AddWishlist() {
   const [description, setDescription] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleNext = (e) => {
     e.preventDefault();
-
-    fetch('http://localhost:5000/wishlists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description }),
-    })
-      .then((res) => res.json())
-      .then((newWishlist) => {
-        navigate(`/add-item?wishlistId=${newWishlist.id}`);
-      })
-      .catch((err) => console.error('Error adding wishlist:', err));
+    if (!title.trim()) {
+      alert('Please enter a title');
+      return;
+    }
+    navigate('/add-item', { state: { title, description } });
   };
 
   return (
@@ -31,7 +25,7 @@ export default function AddWishlist() {
         </div>
       </div>
 
-      <form className={styles.rightColumn} onSubmit={handleSubmit}>
+      <form className={styles.rightColumn} onSubmit={handleNext}>
         <h2>Make a Wish</h2>
 
         <div className={styles.inputGroup}>
@@ -41,6 +35,7 @@ export default function AddWishlist() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            required
           />
 
           <label htmlFor="description">Add a caption</label>

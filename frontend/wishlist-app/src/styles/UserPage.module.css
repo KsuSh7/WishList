@@ -158,3 +158,9 @@ h2 {
   cursor: pointer;
   flex-shrink: 0; 
 }
+
+.noWishlists {
+    margin: 100px;
+    z-index: 1;
+    text-align: center;
+}

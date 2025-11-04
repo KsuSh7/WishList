@@ -29,7 +29,7 @@ export default function UserPage() {
 
   const handleShare = () => {
     const baseUrl = window.location.origin;
-    const shareLink = `${baseUrl}/user/${user?.id || 'guest'}/public`;
+    const shareLink = `${baseUrl}/user`;
 
     navigator.clipboard
       .writeText(shareLink)
@@ -41,6 +41,7 @@ export default function UserPage() {
     startIndex,
     startIndex + visibleCount
   );
+  const showArrows = wishlists.length > visibleCount;
 
   return (
     <div className={styles.container}>
@@ -76,33 +77,41 @@ export default function UserPage() {
 
       <h2>My wishlists</h2>
 
-      <div className={styles.gallery}>
-        <img
-          src={LeftArrow}
-          alt="Left"
-          className={styles.arrowIcon}
-          onClick={handlePrev}
-        />
+      {wishlists.length === 0 ? (
+        <p className={styles.noWishlists}>There are no wishlists yet</p>
+      ) : (
+        <div className={styles.gallery}>
+          {showArrows && (
+            <img
+              src={LeftArrow}
+              alt="Left"
+              className={styles.arrowIcon}
+              onClick={handlePrev}
+            />
+          )}
 
-        <div className={styles.wishlistList}>
-          {visibleWishlists.map((wl) => (
-            <div key={wl.id} className={styles.wishlistCard}>
-              <Link to={`/wishlist/${wl.id}`} className={styles.wishlistLink}>
-                <div className={styles.wishlistImage}></div>
-              </Link>
-              <p className={styles.wishlistLabel}>{wl.title}</p>
-              <p className={styles.wishlistDescription}>{wl.description}</p>
-            </div>
-          ))}
+          <div className={styles.wishlistList}>
+            {visibleWishlists.map((wl) => (
+              <div key={wl.id} className={styles.wishlistCard}>
+                <Link to={`/wishlist/${wl.id}`} className={styles.wishlistLink}>
+                  <div className={styles.wishlistImage}></div>
+                </Link>
+                <p className={styles.wishlistLabel}>{wl.title}</p>
+                <p className={styles.wishlistDescription}>{wl.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {showArrows && (
+            <img
+              src={RightArrow}
+              alt="Right"
+              className={styles.arrowIcon}
+              onClick={handleNext}
+            />
+          )}
         </div>
-
-        <img
-          src={RightArrow}
-          alt="Right"
-          className={styles.arrowIcon}
-          onClick={handleNext}
-        />
-      </div>
+      )}
     </div>
   );
 }

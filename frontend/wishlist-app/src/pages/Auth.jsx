@@ -38,7 +38,7 @@ export default function Auth() {
         {!isLogin && (
           <div className={styles.inputGroup}>
             <label>Username</label>
-            <input type="text" />
+            <input type="text" required />
           </div>
         )}
 
@@ -48,6 +48,7 @@ export default function Auth() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
 
@@ -57,6 +58,7 @@ export default function Auth() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
 
