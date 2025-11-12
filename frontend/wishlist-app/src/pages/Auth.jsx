@@ -12,8 +12,17 @@ export default function Auth() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]+$/;
+
+    if (!email || !password) {
       alert('Please fill in all fields');
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address');
       return;
     }
 
@@ -22,11 +31,17 @@ export default function Auth() {
       return;
     }
 
+    if (!passwordRegex.test(password)) {
+      alert('Password must contain both letters and numbers');
+      return;
+    }
+
     try {
       await login(email, password);
       navigate('/user');
     } catch (err) {
       console.error('Login failed', err);
+      alert('Login failed. Please check your credentials.');
     }
   };
 

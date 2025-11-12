@@ -15,9 +15,32 @@ export default function AddItem() {
   const [price, setPrice] = useState('');
   const [link, setLink] = useState('');
 
+  const isValidUrl = (url) => {
+    try {
+      const parsed = new URL(url);
+      return ['http:', 'https:'].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const handleAddAnother = (e) => {
     e.preventDefault();
-    if (!name.trim() || !price.trim() || !link.trim()) return;
+
+    if (!name.trim()) {
+      alert('Item name is required');
+      return;
+    }
+
+    if (price.trim() && !/^\d+(\.\d+)?$/.test(price)) {
+      alert('Price must be a valid number');
+      return;
+    }
+
+    if (link.trim() && !isValidUrl(link)) {
+      alert('Please enter a valid URL (starting with http or https)');
+      return;
+    }
 
     setItems((prev) => [...prev, { name, price, link }]);
     setName('');
@@ -29,7 +52,23 @@ export default function AddItem() {
     e.preventDefault();
 
     const finalItems = [...items];
-    if (name.trim() && price.trim() && link.trim()) {
+
+    if (name.trim() || price.trim() || link.trim()) {
+      if (!name.trim()) {
+        alert('Item name is required');
+        return;
+      }
+
+      if (price.trim() && !/^\d+(\.\d+)?$/.test(price)) {
+        alert('Price must be a valid number');
+        return;
+      }
+
+      if (link.trim() && !isValidUrl(link)) {
+        alert('Please enter a valid URL (starting with http or https)');
+        return;
+      }
+
       finalItems.push({ name, price, link });
     }
 
@@ -63,24 +102,28 @@ export default function AddItem() {
             className={styles.itemsInput}
             id="name"
             type="text"
+            placeholder="Apple Watch"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
 
-          <label htmlFor="price">Enter its price</label>
+          <label htmlFor="price">Enter its price (optional)</label>
           <input
             className={styles.itemsInput}
             id="price"
             type="text"
+            placeholder="199.99"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
 
-          <label htmlFor="link">Paste a link to your item</label>
+          <label htmlFor="link">Paste a link (optional)</label>
           <input
             className={styles.itemsInput}
             id="link"
             type="text"
+            placeholder="https://example.com/item"
             value={link}
             onChange={(e) => setLink(e.target.value)}
           />

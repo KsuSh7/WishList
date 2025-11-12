@@ -9,6 +9,11 @@
       "id": "715e",
       "title": "bfbng ",
       "description": "Test test test"
+    },
+    {
+      "id": "3d6b",
+      "title": "Name",
+      "description": "kdcfsxd  dlskjc  ld  cljask"
     }
   ],
   "items": [
@@ -46,6 +51,20 @@
       "price": "222",
       "link": "https://github.com/KsuSh7/WishList/tree/lab6",
       "wishlistId": "b840"
+    },
+    {
+      "id": "8eaa",
+      "name": "test2",
+      "price": "12",
+      "link": "",
+      "wishlistId": "3d6b"
+    },
+    {
+      "id": "deaf",
+      "name": "Тест 3",
+      "price": "",
+      "link": "",
+      "wishlistId": "3d6b"
     }
   ]
 }

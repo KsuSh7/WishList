@@ -48,7 +48,7 @@ export default function AddWishlist() {
         </div>
 
         <button type="submit" className={styles.addItemButton}>
-          Add Item
+          Add Items
         </button>
         <Link to="/user" className={styles.backLink}>
           Back
