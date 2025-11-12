@@ -68,3 +68,7 @@ button:hover {
   background-color: #FFCDB2;
   color: #6D6875;
 }
+
+p {
+  z-index: 1;
+}

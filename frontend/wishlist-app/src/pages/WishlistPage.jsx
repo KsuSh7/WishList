@@ -1,4 +1,5 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from '../styles/WishlistPage.module.css';
 import TrashIcon from '../assets/trash.svg';
 import { useAuth } from '../hooks/useAuth';
@@ -8,54 +9,96 @@ export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const {
-    data: wishlist,
+    data: wishlistFromServer = null,
     loading: wishlistLoading,
     error: wishlistError,
-  } = useFetchData(`http://localhost:5000/wishlists/${id}`);
+  } = useFetchData(`${API_URL}/wishlists/${id}`, `wishlist-${id}`);
 
   const {
-    data: items,
+    data: itemsFromServer = [],
     loading: itemsLoading,
     error: itemsError,
-  } = useFetchData(`http://localhost:5000/items?wishlistId=${id}`);
+  } = useFetchData(`${API_URL}/items?wishlistId=${id}`, `items-${id}`);
 
-  if (wishlistLoading || itemsLoading) return <p>Loading...</p>;
-  if (wishlistError || itemsError)
-    return <p>Error loading data: {wishlistError || itemsError}</p>;
-  if (!wishlist) return <p>Wishlist not found</p>;
+  const wishlist = location.state?.wishlist || wishlistFromServer;
+
+  const [items, setItems] = useState([]);
+
+  const offline = wishlistError || itemsError;
+
+  useEffect(() => {
+    if (!location.state?.items && itemsFromServer) {
+      setItems(itemsFromServer);
+    }
+    if (location.state?.items) {
+      setItems(location.state.items);
+    }
+  }, [itemsFromServer, location.state]);
+
+  if (wishlistLoading || itemsLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Loading wishlist...</p>
+        <div className={styles.spinner}></div>
+      </div>
+    );
+  }
+
+  if (!wishlist) {
+    return (
+      <p style={{ color: 'red', textAlign: 'center' }}>
+        Wishlist not found{offline ? ' (offline, showing cached data)' : ''}
+      </p>
+    );
+  }
 
   async function handleDeleteItem(itemId) {
+    if (offline) {
+      const updatedItems = items.filter((item) => item.id !== itemId);
+      setItems(updatedItems);
+      localStorage.setItem(`items-${id}`, JSON.stringify(updatedItems));
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:5000/items/${itemId}`, {
-        method: 'DELETE',
-      });
-      window.location.reload();
+      await fetch(`${API_URL}/items/${itemId}`, { method: 'DELETE' });
+      setItems((prev) => prev.filter((item) => item.id !== itemId));
     } catch (err) {
       console.error('Delete failed:', err);
     }
   }
 
   async function handleDeleteWishlist() {
-    if (window.confirm('Are you sure you want to delete this wishlist?')) {
-      try {
-        await fetch(`http://localhost:5000/wishlists/${id}`, {
-          method: 'DELETE',
-        });
+    if (!window.confirm('Are you sure you want to delete this wishlist?'))
+      return;
 
-        const res = await fetch(`http://localhost:5000/items?wishlistId=${id}`);
-        const relatedItems = await res.json();
-        for (const item of relatedItems) {
-          await fetch(`http://localhost:5000/items/${item.id}`, {
-            method: 'DELETE',
-          });
-        }
+    if (offline) {
+      localStorage.removeItem(`wishlist-${id}`);
+      localStorage.removeItem(`items-${id}`);
+      const allWishlists = JSON.parse(
+        localStorage.getItem('wishlists') || '[]'
+      ).filter((wl) => wl.id !== id);
+      localStorage.setItem('wishlists', JSON.stringify(allWishlists));
+      navigate('/user');
+      return;
+    }
 
-        navigate('/user');
-      } catch (err) {
-        console.error('Delete wishlist failed:', err);
+    try {
+      await fetch(`${API_URL}/wishlists/${id}`, { method: 'DELETE' });
+
+      const res = await fetch(`${API_URL}/items?wishlistId=${id}`);
+      const relatedItems = await res.json();
+      for (const item of relatedItems) {
+        await fetch(`${API_URL}/items/${item.id}`, { method: 'DELETE' });
       }
+
+      navigate('/user');
+    } catch (err) {
+      console.error('Delete wishlist failed:', err);
     }
   }
 
@@ -67,7 +110,7 @@ export default function WishlistPage() {
       </div>
 
       <div className={styles.itemsGrid}>
-        {items && items.length > 0 ? (
+        {items.length > 0 ? (
           items.map((item) => (
             <div key={item.id} className={styles.itemCard}>
               <div className={styles.itemImage}></div>
@@ -125,6 +168,12 @@ export default function WishlistPage() {
             Delete Wishlist
           </button>
         </div>
+      )}
+
+      {offline && (
+        <p style={{ color: 'red', marginTop: '10px' }}>
+          Offline mode — changes only in local storage
+        </p>
       )}
     </div>
   );

@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
 
 export default function UserPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 3;
 
@@ -15,7 +15,7 @@ export default function UserPage() {
     data: wishlists = [],
     loading,
     error,
-  } = useFetchData('http://localhost:5000/wishlists');
+  } = useFetchData(import.meta.env.VITE_API_URL + '/wishlists', 'wishlists');
 
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
@@ -38,8 +38,20 @@ export default function UserPage() {
   );
   const showArrows = wishlists.length > visibleCount;
 
-  if (loading) return <p>Loading wishlists...</p>;
-  if (error) return <p>Error loading wishlists: {error}</p>;
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Loading...</p>
+        <div className={styles.spinner}></div>
+      </div>
+    );
+  }
+  if (error && wishlists.length === 0)
+    return (
+      <p style={{ color: 'red', textAlign: 'center' }}>
+        {error} (no cached data)
+      </p>
+    );
 
   return (
     <div className={styles.container}>
@@ -54,7 +66,7 @@ export default function UserPage() {
         </div>
 
         <div className={styles.userInfo}>
-          <h2>User's page</h2>
+          <h2>{user ? `${user.username}'s page` : "User's page"}</h2>
           <div className={styles.wishlistsInfo}>
             <p className={styles.count}>{wishlists.length}</p>
             <p>Wishlists</p>

@@ -1,4 +1,51 @@
 {
-  "wishlists": [],
-  "items": []
+  "wishlists": [
+    {
+      "id": "b840",
+      "title": "Test 1",
+      "description": "Test test test"
+    },
+    {
+      "id": "715e",
+      "title": "bfbng ",
+      "description": "Test test test"
+    }
+  ],
+  "items": [
+    {
+      "id": "374e",
+      "name": "Test item 1",
+      "price": "111",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "b840"
+    },
+    {
+      "id": "e55c",
+      "name": "test2",
+      "price": "222",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "715e"
+    },
+    {
+      "id": "6343",
+      "name": "test2",
+      "price": "111",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "b840"
+    },
+    {
+      "id": "3cf2",
+      "name": "ивпт",
+      "price": "222",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "b840"
+    },
+    {
+      "id": "e089",
+      "name": "Test item 2",
+      "price": "222",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "b840"
+    }
+  ]
 }

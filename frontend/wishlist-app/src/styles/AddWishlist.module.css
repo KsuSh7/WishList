@@ -29,8 +29,8 @@
 }
 
 .coverButton {
-    margin: 27px;
-    margin-top: 375px;
+  margin: 27px;
+  margin-top: 375px;
 }
 
 h2 {
@@ -67,7 +67,7 @@ label {
   color: #000;
 }
 
-input {
+.inputGroup input, .inputGroupItems input {
   align-items: center;  
   background-color: #FFCDB2;
   width: 100%;
@@ -82,11 +82,13 @@ input {
   width: 100%;
 }
 
+
+
 .itemsInput {
     margin-bottom: 27px !important;
 }
 
-button {
+.addItemButton {
     font-size: 24px;
     margin: 6px;
 }
@@ -109,6 +111,8 @@ button {
 }
 
 .addFinalItemButton {
+  font-size: 24px;
+    margin: 6px;
     background-color: #FFCDB2;
     color: #6D6875;
     transition: color 0.3s ease, background-color 0.3s ease;

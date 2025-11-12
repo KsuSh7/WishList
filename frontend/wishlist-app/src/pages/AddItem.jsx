@@ -9,6 +9,7 @@ export default function AddItem() {
   const { createOrUpdateWishlist, loading, error } = useWishlistManager();
 
   const { title, description, wishlistId } = location.state || {};
+
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -26,18 +27,22 @@ export default function AddItem() {
 
   const handleDone = async (e) => {
     e.preventDefault();
+
     const finalItems = [...items];
     if (name.trim() && price.trim() && link.trim()) {
       finalItems.push({ name, price, link });
     }
 
-    const id = await createOrUpdateWishlist({
+    const result = await createOrUpdateWishlist({
       title,
       description,
       wishlistId,
       items: finalItems,
     });
-    if (id) navigate(`/wishlist/${id}`);
+
+    if (result) {
+      navigate('/user', { replace: true });
+    }
   };
 
   return (
@@ -82,11 +87,20 @@ export default function AddItem() {
         </div>
 
         <div className={styles.buttonGroup}>
-          <button onClick={handleAddAnother}>Add more items</button>
-          <button onClick={handleDone} className={styles.addFinalItemButton}>
-            Done
+          <button onClick={handleAddAnother} className={styles.addItemButton}>
+            Add more items
+          </button>
+
+          <button
+            onClick={handleDone}
+            className={styles.addFinalItemButton}
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : 'Done'}
           </button>
         </div>
+
+        {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
       </form>
     </div>
   );
