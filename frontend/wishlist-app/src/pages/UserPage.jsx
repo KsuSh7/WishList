@@ -18,10 +18,12 @@ export default function UserPage() {
     error,
   } = useFetchData(import.meta.env.VITE_API_URL + '/wishlists', 'wishlists');
 
+  const userWishlists = wishlists.filter((wl) => wl.userId === user?.id);
+
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
     setStartIndex((prev) =>
-      Math.min(prev + 1, Math.max(0, wishlists.length - visibleCount))
+      Math.min(prev + 1, Math.max(0, userWishlists.length - visibleCount))
     );
 
   const handleShare = () => {
@@ -33,11 +35,11 @@ export default function UserPage() {
       .catch(() => alert('Failed to copy link'));
   };
 
-  const visibleWishlists = wishlists.slice(
+  const visibleWishlists = userWishlists.slice(
     startIndex,
     startIndex + visibleCount
   );
-  const showArrows = wishlists.length > visibleCount;
+  const showArrows = userWishlists.length > visibleCount;
 
   if (loading) {
     return (
@@ -47,7 +49,7 @@ export default function UserPage() {
     );
   }
 
-  if (error && wishlists.length === 0)
+  if (error && userWishlists.length === 0)
     return (
       <p style={{ color: 'red', textAlign: 'center' }}>
         {error} (no cached data)
@@ -69,7 +71,7 @@ export default function UserPage() {
         <div className={styles.userInfo}>
           <h2>{user ? `${user.username}'s page` : "User's page"}</h2>
           <div className={styles.wishlistsInfo}>
-            <p className={styles.count}>{wishlists.length}</p>
+            <p className={styles.count}>{userWishlists.length}</p>
             <p>Wishlists</p>
           </div>
         </div>
@@ -88,7 +90,7 @@ export default function UserPage() {
 
       <h2>My wishlists</h2>
 
-      {wishlists.length === 0 ? (
+      {userWishlists.length === 0 ? (
         <p className={styles.noWishlists}>There are no wishlists yet</p>
       ) : (
         <div className={styles.gallery}>

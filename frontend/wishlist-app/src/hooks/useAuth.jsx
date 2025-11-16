@@ -11,27 +11,51 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    await new Promise((r) => setTimeout(r, 300));
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/users?email=${email}&password=${password}`
+    );
 
-    const fakeUser = {
-      username: email.split('@')[0],
-      email,
-      token: 'fake-jwt',
-    };
-    localStorage.setItem('user', JSON.stringify(fakeUser));
-    setUser(fakeUser);
+    if (!res.ok) throw new Error('Server error');
 
-    return fakeUser;
+    const users = await res.json();
+
+    if (users.length === 0) {
+      throw new Error('Invalid email or password');
+    }
+
+    const foundUser = users[0];
+
+    localStorage.setItem('user', JSON.stringify(foundUser));
+    setUser(foundUser);
+
+    return foundUser;
   };
 
   const signup = async (username, email, password) => {
-    await new Promise((r) => setTimeout(r, 300));
+    const newUser = { username, email, password };
 
-    const fakeUser = { username, email, token: 'fake-jwt' };
-    localStorage.setItem('user', JSON.stringify(fakeUser));
-    setUser(fakeUser);
+    const existing = await fetch(
+      `${import.meta.env.VITE_API_URL}/users?email=${email}`
+    );
+    const exists = await existing.json();
+    if (exists.length > 0) {
+      throw new Error('User with this email already exists');
+    }
 
-    return fakeUser;
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUser),
+    });
+
+    if (!res.ok) throw new Error('Signup failed');
+
+    const createdUser = await res.json();
+
+    localStorage.setItem('user', JSON.stringify(createdUser));
+    setUser(createdUser);
+
+    return createdUser;
   };
 
   const logout = () => {
