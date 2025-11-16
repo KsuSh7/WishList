@@ -10,11 +10,27 @@ export function AuthProvider({ children }) {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     await new Promise((r) => setTimeout(r, 300));
-    const fakeUser = { username, token: 'fake-jwt' };
+
+    const fakeUser = {
+      username: email.split('@')[0],
+      email,
+      token: 'fake-jwt',
+    };
     localStorage.setItem('user', JSON.stringify(fakeUser));
     setUser(fakeUser);
+
+    return fakeUser;
+  };
+
+  const signup = async (username, email, password) => {
+    await new Promise((r) => setTimeout(r, 300));
+
+    const fakeUser = { username, email, token: 'fake-jwt' };
+    localStorage.setItem('user', JSON.stringify(fakeUser));
+    setUser(fakeUser);
+
     return fakeUser;
   };
 
@@ -26,7 +42,9 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, login, signup, logout, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

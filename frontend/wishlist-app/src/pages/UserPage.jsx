@@ -5,6 +5,7 @@ import LeftArrow from '../assets/leftArrow.svg';
 import RightArrow from '../assets/rightArrow.svg';
 import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
+import SpinnerIcon from '../assets/spinner.svg';
 
 export default function UserPage() {
   const { isAuthenticated, user } = useAuth();
@@ -41,11 +42,11 @@ export default function UserPage() {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <p>Loading...</p>
-        <div className={styles.spinner}></div>
+        <img src={SpinnerIcon} className={styles.svgSpinner} alt="loading" />
       </div>
     );
   }
+
   if (error && wishlists.length === 0)
     return (
       <p style={{ color: 'red', textAlign: 'center' }}>

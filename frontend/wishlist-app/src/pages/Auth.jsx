@@ -5,24 +5,24 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]+$/;
-
-    if (!email || !password) {
-      alert('Please fill in all fields');
+    if (!email || !password || (!isLogin && !username)) {
+      alert('Please fill in all fields.');
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address');
+      alert('Invalid email format.');
       return;
     }
 
@@ -31,17 +31,17 @@ export default function Auth() {
       return;
     }
 
-    if (!passwordRegex.test(password)) {
-      alert('Password must contain both letters and numbers');
-      return;
-    }
-
     try {
-      await login(email, password);
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        await signup(username, email, password);
+      }
+
       navigate('/user');
     } catch (err) {
-      console.error('Login failed', err);
-      alert('Login failed. Please check your credentials.');
+      alert('Authentication failed');
+      console.error(err);
     }
   };
 
@@ -53,7 +53,12 @@ export default function Auth() {
         {!isLogin && (
           <div className={styles.inputGroup}>
             <label>Username</label>
-            <input type="text" required />
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
           </div>
         )}
 

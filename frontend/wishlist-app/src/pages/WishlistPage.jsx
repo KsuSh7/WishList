@@ -4,6 +4,7 @@ import styles from '../styles/WishlistPage.module.css';
 import TrashIcon from '../assets/trash.svg';
 import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
+import SpinnerIcon from '../assets/spinner.svg';
 
 export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
@@ -42,8 +43,7 @@ export default function WishlistPage() {
   if (wishlistLoading || itemsLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <p>Loading wishlist...</p>
-        <div className={styles.spinner}></div>
+        <img src={SpinnerIcon} className={styles.svgSpinner} alt="loading" />
       </div>
     );
   }
