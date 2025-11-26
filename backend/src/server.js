@@ -18,12 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-}));
-
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(pinoHttp(loggerOptions));
 app.use(session(sessionOptions));
 app.use(express.static(PUBLIC_DIR, { index: 'index.html', maxAge: '1d' }));
@@ -31,53 +26,42 @@ app.use(express.static(PUBLIC_DIR, { index: 'index.html', maxAge: '1d' }));
 app.post('/api/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    if (!username || !email || !password)
       return res.status(400).json({ message: 'Fill all fields' });
-    }
 
-    if (await db.findUserByUsername(username)) {
-      return res.status(400).json({ message: 'Username already exists' });
-    }
+    if (await db.findUserByEmail(email))
+      return res.status(400).json({ message: 'Email already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await db.addUser({ username, email, password: hashedPassword });
 
-    const user = await db.findUserByUsername(username);
-    req.session.user = {
-      id: user.id,
-      username: user.username,
-      email: user.email
-    };
-
-    res.json({ ok: true, user: { id: user.id, username, email } });
+    const user = await db.findUserByEmail(email);
+    req.session.user = { id: user.id, username: user.username, email: user.email };
+    res.json({ ok: true, user: req.session.user });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ message: 'Fill all fields' });
 
-  if (!username || !password)
-    return res.status(400).json({ message: 'Fill all fields' });
+    const user = await db.findUserByEmail(email);
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-  const user = await db.findUserByUsername(username);
-  if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    const passwordValid = await bcrypt.compare(password, user.password);
+    if (!passwordValid) return res.status(401).json({ message: 'Invalid credentials' });
 
-  const passwordValid = await bcrypt.compare(password, user.password);
-  if (!passwordValid) return res.status(401).json({ message: 'Invalid credentials' });
-
-  req.session.user = { 
-    id: user.id,
-    username: user.username, 
-    email: user.email 
-  };
-
-  res.json({ ok: true });
+    req.session.user = { id: user.id, username: user.username, email: user.email };
+    res.json({ ok: true, user: req.session.user });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 });
-
 
 app.get('/api/profile', requireAuth, (req, res) => {
   res.json(req.session.user);

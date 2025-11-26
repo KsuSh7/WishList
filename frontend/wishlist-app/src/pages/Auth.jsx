@@ -32,13 +32,11 @@ export default function Auth() {
     }
 
     try {
-      if (isLogin) {
-        await login(email, password);
-      } else {
-        await signup(username, email, password);
-      }
+      const userData = isLogin
+        ? await login(email, password)
+        : await signup(username, email, password);
 
-      navigate('/user');
+      if (userData) navigate('/user');
     } catch (err) {
       alert('Authentication failed');
       console.error(err);

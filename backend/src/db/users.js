@@ -1,9 +1,9 @@
 import { pool } from './index.js';
 
-export async function findUserByUsername(username) {
+export async function findUserByEmail(email) {
   const [rows] = await pool.query(
-    'SELECT * FROM users WHERE username = ?',
-    [username]
+    'SELECT * FROM users WHERE email = ?',
+    [email]
   );
   return rows[0] || null;
 }

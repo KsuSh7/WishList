@@ -6,21 +6,16 @@ export default function useFetchData(url) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!url) return;
+
     const load = async () => {
       try {
-        const res = await fetch(url, {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error('Server returned an error');
-
         const json = await res.json();
         setData(json);
         setError(null);
-      } catch (err) {
+      } catch {
         setError('Server unavailable');
       } finally {
         setLoading(false);

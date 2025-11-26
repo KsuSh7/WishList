@@ -1,39 +1,42 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from '../styles/UserPage.module.css';
 import LeftArrow from '../assets/leftArrow.svg';
 import RightArrow from '../assets/rightArrow.svg';
+import SpinnerIcon from '../assets/spinner.svg';
 import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
-import SpinnerIcon from '../assets/spinner.svg';
 
 export default function UserPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
   const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 3;
 
+  useEffect(() => {
+    if (!loading && !isAuthenticated) navigate('/auth');
+  }, [loading, isAuthenticated]);
+
   const {
     data: wishlists = [],
-    loading,
+    loading: wishlistsLoading,
     error,
-  } = useFetchData(import.meta.env.VITE_API_URL + '/wishlists', 'wishlists');
+  } = useFetchData(user ? `${import.meta.env.VITE_API_URL}/wishlists` : null);
 
-  const userWishlists = wishlists.filter((wl) => wl.userId === user?.id);
+  if (loading || !user || wishlistsLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <img src={SpinnerIcon} alt="loading" className={styles.svgSpinner} />
+      </div>
+    );
+  }
 
+  const userWishlists = wishlists.filter((wl) => wl.userId === user.id);
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
     setStartIndex((prev) =>
       Math.min(prev + 1, Math.max(0, userWishlists.length - visibleCount))
     );
-
-  const handleShare = () => {
-    const baseUrl = window.location.origin;
-    const shareLink = `${baseUrl}/user`;
-    navigator.clipboard
-      .writeText(shareLink)
-      .then(() => alert('Link copied to clipboard!'))
-      .catch(() => alert('Failed to copy link'));
-  };
 
   const visibleWishlists = userWishlists.slice(
     startIndex,
@@ -41,20 +44,12 @@ export default function UserPage() {
   );
   const showArrows = userWishlists.length > visibleCount;
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <img src={SpinnerIcon} className={styles.svgSpinner} alt="loading" />
-      </div>
-    );
-  }
-
-  if (error && userWishlists.length === 0)
-    return (
-      <p style={{ color: 'red', textAlign: 'center' }}>
-        {error} (no cached data)
-      </p>
-    );
+  const handleShare = () => {
+    navigator.clipboard
+      .writeText(window.location.origin + '/user')
+      .then(() => alert('Link copied!'))
+      .catch(() => alert('Failed to copy'));
+  };
 
   return (
     <div className={styles.container}>
@@ -69,7 +64,7 @@ export default function UserPage() {
         </div>
 
         <div className={styles.userInfo}>
-          <h2>{user ? `${user.username}'s page` : "User's page"}</h2>
+          <h2>{user.username}'s page</h2>
           <div className={styles.wishlistsInfo}>
             <p className={styles.count}>{userWishlists.length}</p>
             <p>Wishlists</p>
@@ -102,7 +97,6 @@ export default function UserPage() {
               onClick={handlePrev}
             />
           )}
-
           <div className={styles.wishlistList}>
             {visibleWishlists.map((wl) => (
               <div key={wl.id} className={styles.wishlistCard}>
@@ -114,7 +108,6 @@ export default function UserPage() {
               </div>
             ))}
           </div>
-
           {showArrows && (
             <img
               src={RightArrow}

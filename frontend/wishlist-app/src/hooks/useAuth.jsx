@@ -4,21 +4,34 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    fetchProfile();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) throw new Error('Invalid credentials or server unavailable');
+    if (!res.ok) throw new Error('Invalid credentials');
 
     const profileRes = await fetch(
       `${import.meta.env.VITE_API_URL}/api/profile`,
@@ -28,11 +41,8 @@ export function AuthProvider({ children }) {
       }
     );
 
-    if (!profileRes.ok) throw new Error('Failed to fetch profile');
-
     const userData = await profileRes.json();
     setUser(userData);
-
     return userData;
   };
 
@@ -46,20 +56,30 @@ export function AuthProvider({ children }) {
 
     if (!res.ok) throw new Error('Signup failed');
 
-    const data = await res.json();
-    setUser({ username, email });
-    return { username, email };
+    const profileRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/profile`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      }
+    );
+
+    const userData = await profileRes.json();
+    setUser(userData);
+    return userData;
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+  const logout = async () => {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, signup, logout }}
+      value={{ user, isAuthenticated: !!user, login, signup, logout, loading }}
     >
       {children}
     </AuthContext.Provider>
