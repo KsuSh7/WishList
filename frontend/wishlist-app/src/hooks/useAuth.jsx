@@ -10,64 +10,56 @@ export function AuthProvider({ children }) {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  const login = async (email, password) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?email=${email}&password=${password}`
+  const login = async (username, password) => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!res.ok) throw new Error('Invalid credentials or server unavailable');
+
+    const profileRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/profile`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      }
     );
 
-    if (!res.ok) throw new Error('Server error');
+    if (!profileRes.ok) throw new Error('Failed to fetch profile');
 
-    const users = await res.json();
+    const userData = await profileRes.json();
+    setUser(userData);
 
-    if (users.length === 0) {
-      throw new Error('Invalid email or password');
-    }
-
-    const foundUser = users[0];
-
-    localStorage.setItem('user', JSON.stringify(foundUser));
-    setUser(foundUser);
-
-    return foundUser;
+    return userData;
   };
 
   const signup = async (username, email, password) => {
-    const newUser = { username, email, password };
-
-    const existing = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?email=${email}`
-    );
-    const exists = await existing.json();
-    if (exists.length > 0) {
-      throw new Error('User with this email already exists');
-    }
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newUser),
+      credentials: 'include',
+      body: JSON.stringify({ username, email, password }),
     });
 
     if (!res.ok) throw new Error('Signup failed');
 
-    const createdUser = await res.json();
-
-    localStorage.setItem('user', JSON.stringify(createdUser));
-    setUser(createdUser);
-
-    return createdUser;
+    const data = await res.json();
+    setUser({ username, email });
+    return { username, email };
   };
 
   const logout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setUser(null);
   };
 
-  const isAuthenticated = !!user;
-
   return (
     <AuthContext.Provider
-      value={{ user, login, signup, logout, isAuthenticated }}
+      value={{ user, isAuthenticated: !!user, login, signup, logout }}
     >
       {children}
     </AuthContext.Provider>
