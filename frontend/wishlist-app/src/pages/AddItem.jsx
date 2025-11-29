@@ -32,7 +32,7 @@ export default function AddItem() {
       return;
     }
 
-    if (price.trim() && !/^\d+(\.\d+)?$/.test(price)) {
+    if (price.trim() && isNaN(Number(price))) {
       alert('Price must be a valid number');
       return;
     }
@@ -42,7 +42,10 @@ export default function AddItem() {
       return;
     }
 
-    setItems((prev) => [...prev, { name, price, link }]);
+    setItems((prev) => [
+      ...prev,
+      { name, price: price.trim() ? Number(price) : 0, link },
+    ]);
     setName('');
     setPrice('');
     setLink('');
@@ -53,23 +56,8 @@ export default function AddItem() {
 
     const finalItems = [...items];
 
-    if (name.trim() || price.trim() || link.trim()) {
-      if (!name.trim()) {
-        alert('Item name is required');
-        return;
-      }
-
-      if (price.trim() && !/^\d+(\.\d+)?$/.test(price)) {
-        alert('Price must be a valid number');
-        return;
-      }
-
-      if (link.trim() && !isValidUrl(link)) {
-        alert('Please enter a valid URL (starting with http or https)');
-        return;
-      }
-
-      finalItems.push({ name, price, link });
+    if (name.trim()) {
+      finalItems.push({ name, price: price.trim() ? Number(price) : 0, link });
     }
 
     const result = await createOrUpdateWishlist({
@@ -105,7 +93,6 @@ export default function AddItem() {
             placeholder="Apple Watch"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
           />
 
           <label htmlFor="price">Enter its price (optional)</label>

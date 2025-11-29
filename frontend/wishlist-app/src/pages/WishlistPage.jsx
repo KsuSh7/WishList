@@ -23,7 +23,7 @@ export default function WishlistPage() {
     data: itemsFromServer = [],
     loading: itemsLoading,
     error: itemsError,
-  } = useFetchData(`${API_URL}/items?wishlistId=${id}`, `items-${id}`);
+  } = useFetchData(`${API_URL}/items?wishlist_id=${id}`, `items-${id}`);
 
   const wishlist = location.state?.wishlist || wishlistFromServer;
 
@@ -90,7 +90,7 @@ export default function WishlistPage() {
     try {
       await fetch(`${API_URL}/wishlists/${id}`, { method: 'DELETE' });
 
-      const res = await fetch(`${API_URL}/items?wishlistId=${id}`);
+      const res = await fetch(`${API_URL}/items?wishlist_id=${id}`);
       const relatedItems = await res.json();
       for (const item of relatedItems) {
         await fetch(`${API_URL}/items/${item.id}`, { method: 'DELETE' });
@@ -152,7 +152,7 @@ export default function WishlistPage() {
           <Link
             to="/add-item"
             state={{
-              wishlistId: id,
+              wishlist_id: id,
               title: wishlist.title,
               description: wishlist.description,
             }}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export default function useFetchData(url) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -9,14 +9,21 @@ export default function useFetchData(url) {
     if (!url) return;
 
     const load = async () => {
+      setLoading(true);
       try {
         const res = await fetch(url, { credentials: 'include' });
-        if (!res.ok) throw new Error('Server returned an error');
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('Fetch failed:', url, res.status, txt);
+          throw new Error(`Server error: ${res.status}`);
+        }
         const json = await res.json();
         setData(json);
         setError(null);
-      } catch {
-        setError('Server unavailable');
+      } catch (err) {
+        console.error(err);
+        setError(err.message || 'Server unavailable');
+        setData(null);
       } finally {
         setLoading(false);
       }

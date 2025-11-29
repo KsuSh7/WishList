@@ -31,7 +31,7 @@ export default function UserPage() {
     );
   }
 
-  const userWishlists = wishlists.filter((wl) => wl.userId === user.id);
+  const userWishlists = wishlists.filter((wl) => wl.user_id === user.id);
   const handlePrev = () => setStartIndex((prev) => Math.max(prev - 1, 0));
   const handleNext = () =>
     setStartIndex((prev) =>
