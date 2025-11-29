@@ -93,33 +93,57 @@ app.post('/api/logout', (req, res) => {
    WISHLISTS
 ============================ */
 
-app.get('/wishlists', requireAuth, async (req, res) => {
+app.get('/wishlists', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT * FROM wishlists WHERE user_id = ?`,
-      [req.session.user.id]
-    );
-    res.json(rows);
+    const { user_id } = req.query;
+
+    let wishlists;
+
+    if (user_id) {
+      const [rows] = await pool.query(
+        'SELECT id, title, description, user_id FROM wishlists WHERE user_id = ?',
+        [user_id]
+      );
+      wishlists = rows;
+    } else {
+      if (!req.session.user) {
+        return res.status(401).json({ message: 'Not logged in' });
+      }
+
+      const [rows] = await pool.query(
+        'SELECT id, title, description, user_id FROM wishlists WHERE user_id = ?',
+        [req.session.user.id]
+      );
+      wishlists = rows;
+    }
+
+    res.json(wishlists);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-app.get('/wishlists/:id', requireAuth, async (req, res) => {
+
+app.get('/wishlists/:id', async (req, res) => {
   try {
+    const { id } = req.params;
     const [rows] = await pool.query(
-      `SELECT * FROM wishlists WHERE id = ? AND user_id = ?`,
-      [req.params.id, req.session.user.id]
+      'SELECT id, title, description, user_id FROM wishlists WHERE id = ?',
+      [id]
     );
-    if (rows.length === 0)
+
+    if (rows.length === 0) {
       return res.status(404).json({ message: 'Wishlist not found' });
+    }
+
     res.json(rows[0]);
   } catch (err) {
-    console.error('Get wishlist error:', err);
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 app.post('/wishlists', requireAuth, async (req, res) => {
   try {
@@ -174,22 +198,23 @@ app.delete('/wishlists/:id', requireAuth, async (req, res) => {
 ============================ */
 
 
-app.get('/items', requireAuth, async (req, res) => {
+app.get('/items', async (req, res) => {
   try {
     const { wishlist_id } = req.query;
-    if (!wishlist_id) return res.status(400).json({ message: 'wishlist_id is required' });
+    if (!wishlist_id) return res.status(400).json({ message: 'wishlist_id required' });
 
     const [rows] = await pool.query(
-      `SELECT * FROM items WHERE wishlist_id = ?`,
+      'SELECT id, name, price, link, wishlist_id FROM items WHERE wishlist_id = ?',
       [wishlist_id]
     );
 
     res.json(rows);
   } catch (err) {
-    console.error('Get items error:', err);
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 app.post('/items', requireAuth, async (req, res) => {
   try {

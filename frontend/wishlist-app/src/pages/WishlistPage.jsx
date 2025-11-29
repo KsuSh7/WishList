@@ -7,7 +7,7 @@ import useFetchData from '../hooks/useFetchData';
 import SpinnerIcon from '../assets/spinner.svg';
 
 export default function WishlistPage() {
-  const { isAuthenticated } = useAuth();
+  const { user: authUser } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,14 +17,13 @@ export default function WishlistPage() {
     data: wishlistFromServer = null,
     loading: wishlistLoading,
     error: wishlistError,
-  } = useFetchData(`${API_URL}/wishlists/${id}`, `wishlist-${id}`);
+  } = useFetchData(`${API_URL}/wishlists/${id}`, `wishlist-${id}`, false);
 
   const {
     data: itemsFromServer = [],
     loading: itemsLoading,
     error: itemsError,
-    refetch: refetchItems,
-  } = useFetchData(`${API_URL}/items?wishlist_id=${id}`, `items-${id}`);
+  } = useFetchData(`${API_URL}/items?wishlist_id=${id}`, `items-${id}`, false);
 
   const wishlist = location.state?.wishlist || wishlistFromServer;
 
@@ -53,6 +52,8 @@ export default function WishlistPage() {
       </p>
     );
   }
+
+  const ownerView = authUser && authUser.id === wishlist.user_id;
 
   async function handleDeleteItem(itemId) {
     try {
@@ -120,7 +121,7 @@ export default function WishlistPage() {
                   <p className={styles.itemPrice}>${item.price}</p>
                 </div>
                 <div className={styles.itemButtons}>
-                  {isAuthenticated && (
+                  {ownerView && (
                     <button
                       className={styles.deleteButton}
                       onClick={() => handleDeleteItem(item.id)}
@@ -150,7 +151,7 @@ export default function WishlistPage() {
         )}
       </div>
 
-      {isAuthenticated && (
+      {ownerView && (
         <div className={styles.buttonsGroup}>
           <Link
             to="/add-item"
