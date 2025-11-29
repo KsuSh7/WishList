@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
 
 export default function UserPage() {
-  const { user: authUser, loading } = useAuth();
+  const { user: authUser, updateUser, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [startIndex, setStartIndex] = useState(0);
@@ -64,15 +64,74 @@ export default function UserPage() {
       .catch(() => alert('Failed to copy'));
   };
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/avatar`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const data = await res.json();
+
+      console.log('Avatar server response:', data);
+
+      updateUser((prev) => ({
+        ...prev,
+        avatar: data.avatar,
+      }));
+
+      window.location.reload();
+
+      alert('Avatar updated!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload avatar');
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.profile}>
         <div className={styles.avatarBlock}>
-          <div className={styles.avatarPlaceholder}></div>
+          {authUser.avatar ? (
+            <img
+              src={`${import.meta.env.VITE_API_URL}${authUser.avatar}`}
+              alt="avatar"
+              className={styles.avatarImage}
+            />
+          ) : (
+            <div className={styles.avatarPlaceholder}></div>
+          )}
+
           {ownerView && authUser && (
-            <a href="#" className={styles.uploadLink}>
-              Add picture
-            </a>
+            <>
+              <a
+                href="#"
+                className={styles.uploadLink}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('avatarInput').click();
+                }}
+              >
+                Add picture
+              </a>
+              <input
+                type="file"
+                id="avatarInput"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
+            </>
           )}
         </div>
 

@@ -22,6 +22,14 @@
     gap: 15px; 
 }
 
+.avatarImage {
+  width: 235px;
+  height: 235px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
 .avatarPlaceholder {
   width: 235px;
   height: 235px;
@@ -183,3 +191,4 @@ h2 {
     transform: rotate(360deg);
   }
 }
+

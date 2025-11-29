@@ -11,6 +11,11 @@ import { loggerOptions } from './config/logger.js';
 import { sessionOptions } from './config/session.js';
 import { requireAuth } from './middlewares/auth.js';
 
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,6 +31,37 @@ app.use(
 
 app.use(pinoHttp(loggerOptions));
 app.use(session(sessionOptions));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = './uploads/avatars';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${req.session.user.id}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({ storage });
+
+app.post('/users/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
+  console.log('req.session.user:', req.session.user);
+  console.log('req.file:', req.file);
+
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const avatarPath = `/uploads/avatars/${req.file.filename}`;
+    await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [avatarPath, req.session.user.id]);
+    res.json({ avatar: avatarPath });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 /* ============================
    AUTH
@@ -47,6 +83,7 @@ app.post('/api/register', async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      avatar: user.avatar,
     };
 
     res.json({ ok: true, user: req.session.user });
@@ -69,6 +106,7 @@ app.post('/api/login', async (req, res) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      avatar: user.avatar,
     };
 
     res.json({ ok: true, user: req.session.user });

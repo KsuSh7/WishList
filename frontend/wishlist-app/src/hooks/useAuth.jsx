@@ -31,19 +31,14 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) throw new Error('Invalid credentials');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Invalid credentials');
+    }
 
-    const profileRes = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/profile`,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      }
-    );
-
-    const userData = await profileRes.json();
-    setUser(userData);
-    return userData;
+    const data = await res.json();
+    setUser(data.user);
+    return data.user;
   };
 
   const signup = async (username, email, password) => {
@@ -54,19 +49,14 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ username, email, password }),
     });
 
-    if (!res.ok) throw new Error('Signup failed');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Signup failed');
+    }
 
-    const profileRes = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/profile`,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      }
-    );
-
-    const userData = await profileRes.json();
-    setUser(userData);
-    return userData;
+    const data = await res.json();
+    setUser(data.user);
+    return data.user;
   };
 
   const logout = async () => {
@@ -76,10 +66,22 @@ export function AuthProvider({ children }) {
     });
     setUser(null);
   };
+  const updateUser = (newData) => {
+    setUser((prev) => ({ ...prev, ...newData }));
+    console.log('authUser after update:', user);
+  };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, signup, logout, loading }}
+      value={{
+        user,
+        isAuthenticated: !!user,
+        login,
+        signup,
+        logout,
+        updateUser,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>
