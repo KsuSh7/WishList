@@ -23,6 +23,7 @@ export default function WishlistPage() {
     data: itemsFromServer = [],
     loading: itemsLoading,
     error: itemsError,
+    refetch: refetchItems,
   } = useFetchData(`${API_URL}/items?wishlist_id=${id}`, `items-${id}`);
 
   const wishlist = location.state?.wishlist || wishlistFromServer;
@@ -32,13 +33,10 @@ export default function WishlistPage() {
   const offline = wishlistError || itemsError;
 
   useEffect(() => {
-    if (!location.state?.items && itemsFromServer) {
+    if (itemsFromServer) {
       setItems(itemsFromServer);
     }
-    if (location.state?.items) {
-      setItems(location.state.items);
-    }
-  }, [itemsFromServer, location.state]);
+  }, [itemsFromServer]);
 
   if (wishlistLoading || itemsLoading) {
     return (
@@ -51,24 +49,27 @@ export default function WishlistPage() {
   if (!wishlist) {
     return (
       <p style={{ color: 'red', textAlign: 'center' }}>
-        Wishlist not found{offline ? ' (offline, showing cached data)' : ''}
+        Wishlist not found{offline ? ' (server unavailable)' : ''}
       </p>
     );
   }
 
   async function handleDeleteItem(itemId) {
-    if (offline) {
-      const updatedItems = items.filter((item) => item.id !== itemId);
-      setItems(updatedItems);
-      localStorage.setItem(`items-${id}`, JSON.stringify(updatedItems));
-      return;
-    }
-
     try {
-      await fetch(`${API_URL}/items/${itemId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/items/${itemId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Failed to delete item');
+      }
+
       setItems((prev) => prev.filter((item) => item.id !== itemId));
     } catch (err) {
       console.error('Delete failed:', err);
+      alert('Server unavailable, cannot delete item.');
     }
   }
 
@@ -76,29 +77,28 @@ export default function WishlistPage() {
     if (!window.confirm('Are you sure you want to delete this wishlist?'))
       return;
 
-    if (offline) {
-      localStorage.removeItem(`wishlist-${id}`);
-      localStorage.removeItem(`items-${id}`);
-      const allWishlists = JSON.parse(
-        localStorage.getItem('wishlists') || '[]'
-      ).filter((wl) => wl.id !== id);
-      localStorage.setItem('wishlists', JSON.stringify(allWishlists));
-      navigate('/user');
-      return;
-    }
-
     try {
-      await fetch(`${API_URL}/wishlists/${id}`, { method: 'DELETE' });
+      const resWishlist = await fetch(`${API_URL}/wishlists/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!resWishlist.ok) throw new Error('Failed to delete wishlist');
 
-      const res = await fetch(`${API_URL}/items?wishlist_id=${id}`);
-      const relatedItems = await res.json();
+      const resItems = await fetch(`${API_URL}/items?wishlist_id=${id}`, {
+        credentials: 'include',
+      });
+      const relatedItems = await resItems.json();
       for (const item of relatedItems) {
-        await fetch(`${API_URL}/items/${item.id}`, { method: 'DELETE' });
+        await fetch(`${API_URL}/items/${item.id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
       }
 
       navigate('/user');
     } catch (err) {
       console.error('Delete wishlist failed:', err);
+      alert('Server unavailable, cannot delete wishlist.');
     }
   }
 
@@ -134,7 +134,10 @@ export default function WishlistPage() {
                   )}
                   <button
                     className={styles.viewButton}
-                    onClick={() => window.open(item.link, '_blank')}
+                    onClick={() =>
+                      item.link && window.open(item.link, '_blank')
+                    }
+                    disabled={!item.link}
                   >
                     View
                   </button>
@@ -152,7 +155,7 @@ export default function WishlistPage() {
           <Link
             to="/add-item"
             state={{
-              wishlist_id: id,
+              wishlist_id: wishlist.id,
               title: wishlist.title,
               description: wishlist.description,
             }}
@@ -172,7 +175,7 @@ export default function WishlistPage() {
 
       {offline && (
         <p style={{ color: 'red', marginTop: '10px' }}>
-          Offline mode — changes only in local storage
+          Server unavailable — changes cannot be saved
         </p>
       )}
     </div>

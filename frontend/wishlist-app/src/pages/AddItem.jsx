@@ -8,7 +8,7 @@ export default function AddItem() {
   const location = useLocation();
   const { createOrUpdateWishlist, loading, error } = useWishlistManager();
 
-  const { title, description, wishlistId } = location.state || {};
+  const { title, description, wishlist_id } = location.state || {};
 
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
@@ -46,6 +46,7 @@ export default function AddItem() {
       ...prev,
       { name, price: price.trim() ? Number(price) : 0, link },
     ]);
+
     setName('');
     setPrice('');
     setLink('');
@@ -63,12 +64,12 @@ export default function AddItem() {
     const result = await createOrUpdateWishlist({
       title,
       description,
-      wishlistId,
+      wishlist_id,
       items: finalItems,
     });
 
     if (result) {
-      navigate('/user', { replace: true });
+      navigate(`/wishlist/${result.wishlist.id}`, { replace: true });
     }
   };
 

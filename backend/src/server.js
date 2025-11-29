@@ -17,7 +17,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS для фронтенду
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -25,10 +24,7 @@ app.use(
   })
 );
 
-// Логування
 app.use(pinoHttp(loggerOptions));
-
-// Сесії
 app.use(session(sessionOptions));
 
 /* ============================
@@ -97,7 +93,6 @@ app.post('/api/logout', (req, res) => {
    WISHLISTS
 ============================ */
 
-// отримати всі wishlists користувача
 app.get('/wishlists', requireAuth, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -111,7 +106,6 @@ app.get('/wishlists', requireAuth, async (req, res) => {
   }
 });
 
-// отримати конкретний wishlist
 app.get('/wishlists/:id', requireAuth, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -127,7 +121,6 @@ app.get('/wishlists/:id', requireAuth, async (req, res) => {
   }
 });
 
-// створити wishlist
 app.post('/wishlists', requireAuth, async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -147,7 +140,6 @@ app.post('/wishlists', requireAuth, async (req, res) => {
   }
 });
 
-// оновити wishlist
 app.put('/wishlists/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -163,7 +155,6 @@ app.put('/wishlists/:id', requireAuth, async (req, res) => {
   }
 });
 
-// видалити wishlist
 app.delete('/wishlists/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,16 +173,17 @@ app.delete('/wishlists/:id', requireAuth, async (req, res) => {
    ITEMS
 ============================ */
 
-// отримати айтеми по wishlist_id
+
 app.get('/items', requireAuth, async (req, res) => {
   try {
     const { wishlist_id } = req.query;
     if (!wishlist_id) return res.status(400).json({ message: 'wishlist_id is required' });
 
     const [rows] = await pool.query(
-      `SELECT * FROM items WHERE wishlist_id = ? AND user_id = ?`,
-      [wishlist_id, req.session.user.id]
+      `SELECT * FROM items WHERE wishlist_id = ?`,
+      [wishlist_id]
     );
+
     res.json(rows);
   } catch (err) {
     console.error('Get items error:', err);
@@ -199,7 +191,6 @@ app.get('/items', requireAuth, async (req, res) => {
   }
 });
 
-// створити айтем
 app.post('/items', requireAuth, async (req, res) => {
   try {
     const { name, price, link, wishlist_id } = req.body;
@@ -223,20 +214,25 @@ app.post('/items', requireAuth, async (req, res) => {
 });
 
 
-// видалити айтем
 app.delete('/items/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query(`DELETE FROM items WHERE id = ? AND user_id = ?`, [
-      id,
-      req.session.user.id,
-    ]);
+    const [result] = await pool.query(
+      `DELETE FROM items WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
     res.json({ ok: true });
   } catch (err) {
     console.error('Delete item error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 /* ============================
    START SERVER

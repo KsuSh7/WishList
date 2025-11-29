@@ -18,7 +18,22 @@ export default function useWishlistManager() {
     try {
       let savedWishlist;
 
-      // CREATE
+      if (wishlist_id) {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists/${wishlist_id}`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (res.ok) {
+          savedWishlist = await res.json();
+        } else if (res.status === 404) {
+          wishlist_id = null;
+        } else {
+          throw new Error('Failed to check wishlist existence');
+        }
+      }
+
       if (!wishlist_id) {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/wishlists`, {
           method: 'POST',
@@ -31,25 +46,6 @@ export default function useWishlistManager() {
         savedWishlist = await res.json();
       }
 
-      // UPDATE
-      else {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/wishlists/${wishlist_id}`,
-          {
-            method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, description }),
-          }
-        );
-
-        if (!res.ok) throw new Error('Wishlist update failed');
-        savedWishlist = await res.json();
-      }
-
-      if (!savedWishlist?.id) throw new Error('Wishlist response missing id');
-
-      // SAVE ITEMS
       const savedItems = [];
       if (Array.isArray(items) && items.length > 0) {
         for (const item of items) {
@@ -66,6 +62,7 @@ export default function useWishlistManager() {
           });
 
           if (res.ok) savedItems.push(await res.json());
+          else console.warn('Item not saved', item);
         }
       }
 
