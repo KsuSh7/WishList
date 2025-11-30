@@ -133,11 +133,28 @@ h2 {
 
 .wishlistImage {
   width: 100%;
-  height: 436px;      
-  background-color: #FFB4A2;  
+  height: 436px;
   border-radius: 12px;
+  object-fit: cover;
+  display: block;
   cursor: pointer;
 }
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 436px;
+  border-radius: 12px;
+  background-color: #FFB4A2;
+  cursor: pointer;
+}
+
 
 .wishlistLabel {
   margin-top: 8px;

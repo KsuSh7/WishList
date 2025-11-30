@@ -43,7 +43,32 @@ const storage = multer.diskStorage({
     cb(null, `${req.session.user.id}${path.extname(file.originalname)}`);
   },
 });
+const wishlistCoverStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = './uploads/wishlist_covers';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${req.params.id}${ext}`);
+  },
+});
 
+const itemCoverStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = './uploads/item_covers';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${req.params.id}${ext}`);
+  },
+});
+
+const uploadWishlistCover = multer({ storage: wishlistCoverStorage });
+const uploadItemCover = multer({ storage: itemCoverStorage });
 const upload = multer({ storage });
 
 app.post('/users/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
@@ -139,7 +164,7 @@ app.get('/wishlists', async (req, res) => {
 
     if (user_id) {
       const [rows] = await pool.query(
-        'SELECT id, title, description, user_id FROM wishlists WHERE user_id = ?',
+        'SELECT id, title, description, user_id, cover FROM wishlists WHERE user_id = ?',
         [user_id]
       );
       wishlists = rows;
@@ -201,6 +226,29 @@ app.post('/wishlists', requireAuth, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+app.post('/wishlists/:id/cover', requireAuth, uploadWishlistCover.single('cover'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const wishlistId = req.params.id;
+    const coverPath = `/uploads/wishlist_covers/${req.file.filename}`;
+
+    const [result] = await pool.query(
+      'UPDATE wishlists SET cover = ? WHERE id = ? AND user_id = ?',
+      [coverPath, wishlistId, req.session.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Wishlist not found or not authorized' });
+    }
+
+    res.json({ cover: coverPath });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 app.put('/wishlists/:id', requireAuth, async (req, res) => {
   try {
@@ -242,11 +290,33 @@ app.get('/items', async (req, res) => {
     if (!wishlist_id) return res.status(400).json({ message: 'wishlist_id required' });
 
     const [rows] = await pool.query(
-      'SELECT id, name, price, link, wishlist_id FROM items WHERE wishlist_id = ?',
+      'SELECT id, name, price, link, wishlist_id, cover FROM items WHERE wishlist_id = ?',
       [wishlist_id]
     );
 
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+app.post('/items/cover/:id', requireAuth, uploadItemCover.single('cover'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const itemId = req.params.id;
+    const coverPath = `/uploads/item_covers/${req.file.filename}`;
+
+    const [result] = await pool.query(
+      'UPDATE items SET cover = ? WHERE id = ?',
+      [coverPath, itemId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    res.json({ cover: coverPath });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

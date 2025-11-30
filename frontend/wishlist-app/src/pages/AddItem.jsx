@@ -6,59 +6,58 @@ import useWishlistManager from '../hooks/useWishlistManager';
 export default function AddItem() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { createOrUpdateWishlist, loading, error } = useWishlistManager();
+  const { title, description, coverFile, wishlist_id } = location.state || {};
 
-  const { title, description, wishlist_id } = location.state || {};
+  const { createOrUpdateWishlist, loading, error } = useWishlistManager();
 
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [link, setLink] = useState('');
+  const [itemCoverFile, setItemCoverFile] = useState(null);
+  const [itemCoverPreview, setItemCoverPreview] = useState(null);
 
-  const isValidUrl = (url) => {
-    try {
-      const parsed = new URL(url);
-      return ['http:', 'https:'].includes(parsed.protocol);
-    } catch {
-      return false;
-    }
+  const handleItemCoverChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setItemCoverFile(file);
+    setItemCoverPreview(URL.createObjectURL(file));
   };
 
   const handleAddAnother = (e) => {
     e.preventDefault();
-
-    if (!name.trim()) {
-      alert('Item name is required');
-      return;
-    }
-
-    if (price.trim() && isNaN(Number(price))) {
-      alert('Price must be a valid number');
-      return;
-    }
-
-    if (link.trim() && !isValidUrl(link)) {
-      alert('Please enter a valid URL (starting with http or https)');
-      return;
-    }
+    if (!name.trim()) return alert('Item name is required');
+    if (price.trim() && isNaN(Number(price)))
+      return alert('Price must be a number');
 
     setItems((prev) => [
       ...prev,
-      { name, price: price.trim() ? Number(price) : 0, link },
+      {
+        name,
+        price: price ? Number(price) : 0,
+        link,
+        imageFile: itemCoverFile || null,
+      },
     ]);
 
     setName('');
     setPrice('');
     setLink('');
+    setItemCoverFile(null);
+    setItemCoverPreview(null);
   };
 
   const handleDone = async (e) => {
     e.preventDefault();
 
     const finalItems = [...items];
-
     if (name.trim()) {
-      finalItems.push({ name, price: price.trim() ? Number(price) : 0, link });
+      finalItems.push({
+        name,
+        price: price ? Number(price) : 0,
+        link,
+        imageFile: itemCoverFile || null,
+      });
     }
 
     const result = await createOrUpdateWishlist({
@@ -66,10 +65,13 @@ export default function AddItem() {
       description,
       wishlist_id,
       items: finalItems,
+      wishlistCover: coverFile || null,
     });
 
     if (result) {
-      navigate(`/wishlist/${result.wishlist.id}`, { replace: true });
+      navigate(`/wishlist/${result.wishlist.id}`);
+    } else {
+      alert('Saving failed: ' + (error || 'unknown'));
     }
   };
 
@@ -77,8 +79,33 @@ export default function AddItem() {
     <div className={styles.container}>
       <div className={styles.leftColumn}>
         <div className={styles.coverCard}>
-          <div className={styles.coverImage}></div>
-          <button className={styles.coverButton}>Upload cover</button>
+          {itemCoverPreview ? (
+            <img
+              src={itemCoverPreview}
+              alt="Item cover preview"
+              className={styles.coverImage}
+            />
+          ) : (
+            <div className={styles.coverImage}></div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            id="itemCoverInput"
+            style={{ display: 'none' }}
+            onChange={handleItemCoverChange}
+          />
+
+          <button
+            className={styles.coverButton}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('itemCoverInput').click();
+            }}
+          >
+            Upload item cover
+          </button>
         </div>
       </div>
 
@@ -86,32 +113,23 @@ export default function AddItem() {
         <h2>Add an Item</h2>
 
         <div className={styles.inputGroupItems}>
-          <label htmlFor="name">Enter item’s name</label>
+          <label>Item name</label>
           <input
             className={styles.itemsInput}
-            id="name"
-            type="text"
-            placeholder="Apple Watch"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
 
-          <label htmlFor="price">Enter its price (optional)</label>
+          <label>Price (optional)</label>
           <input
             className={styles.itemsInput}
-            id="price"
-            type="text"
-            placeholder="199.99"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
 
-          <label htmlFor="link">Paste a link (optional)</label>
+          <label>Link (optional)</label>
           <input
             className={styles.itemsInput}
-            id="link"
-            type="text"
-            placeholder="https://example.com/item"
             value={link}
             onChange={(e) => setLink(e.target.value)}
           />
@@ -131,7 +149,7 @@ export default function AddItem() {
           </button>
         </div>
 
-        {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
       </form>
     </div>
   );

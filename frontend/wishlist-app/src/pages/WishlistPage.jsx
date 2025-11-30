@@ -114,7 +114,17 @@ export default function WishlistPage() {
         {items.length > 0 ? (
           items.map((item) => (
             <div key={item.id} className={styles.itemCard}>
-              <div className={styles.itemImage}></div>
+              <div className={styles.itemImage}>
+                {item.cover ? (
+                  <img
+                    src={`${API_URL}${item.cover}`}
+                    alt={item.name}
+                    className={styles.itemCover}
+                  />
+                ) : (
+                  <div className={styles.itemPlaceholder}></div>
+                )}
+              </div>
               <div className={styles.itemInfo}>
                 <div className={styles.textBlock}>
                   <p className={styles.itemName}>{item.name}</p>

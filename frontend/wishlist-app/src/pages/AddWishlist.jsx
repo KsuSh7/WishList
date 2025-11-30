@@ -5,23 +5,67 @@ import styles from '../styles/AddWishlist.module.css';
 export default function AddWishlist() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setCoverFile(file);
+    if (file) {
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleNext = (e) => {
     e.preventDefault();
+
     if (!title.trim()) {
       alert('Please enter a title');
       return;
     }
-    navigate('/add-item', { state: { title, description } });
+
+    navigate('/add-item', {
+      state: {
+        title,
+        description,
+        coverFile,
+      },
+    });
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.leftColumn}>
         <div className={styles.coverCard}>
-          <div className={styles.coverImage}></div>
-          <button className={styles.coverButton}>Upload cover</button>
+          <div className={styles.coverImage}>
+            {coverPreview ? (
+              <img
+                src={coverPreview}
+                alt="Preview"
+                className={styles.coverPreview}
+              />
+            ) : (
+              <div className={styles.coverPlaceholder}></div>
+            )}
+          </div>
+
+          <input
+            type="file"
+            accept="image/*"
+            id="coverInput"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+
+          <button
+            type="button"
+            className={styles.coverButton}
+            onClick={() => document.getElementById('coverInput').click()}
+          >
+            Upload cover
+          </button>
         </div>
       </div>
 
@@ -50,6 +94,7 @@ export default function AddWishlist() {
         <button type="submit" className={styles.addItemButton}>
           Add Items
         </button>
+
         <Link to="/user" className={styles.backLink}>
           Back
         </Link>

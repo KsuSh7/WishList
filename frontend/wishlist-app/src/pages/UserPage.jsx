@@ -174,19 +174,32 @@ export default function UserPage() {
             />
           )}
           <div className={styles.wishlistList}>
-            {visibleWishlists.map((wl) => (
-              <div key={wl.id} className={styles.wishlistCard}>
-                <Link
-                  to={`/wishlist/${wl.id}`}
-                  className={styles.wishlistLink}
-                  state={ownerView && authUser ? { wishlist: wl } : {}}
-                >
-                  <div className={styles.wishlistImage}></div>
-                </Link>
-                <p className={styles.wishlistLabel}>{wl.title}</p>
-                <p className={styles.wishlistDescription}>{wl.description}</p>
-              </div>
-            ))}
+            {visibleWishlists.map((wl) => {
+              console.log('Wishlist:', wl);
+              console.log('Cover value:', wl.cover);
+
+              return (
+                <div key={wl.id} className={styles.wishlistCard}>
+                  <Link
+                    to={`/wishlist/${wl.id}`}
+                    className={styles.wishlistLink}
+                    state={ownerView && authUser ? { wishlist: wl } : {}}
+                  >
+                    {wl.cover ? (
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}${wl.cover}`}
+                        alt={wl.title}
+                        className={styles.wishlistImage}
+                      />
+                    ) : (
+                      <div className={styles.coverPlaceholder}></div>
+                    )}
+                  </Link>
+                  <p className={styles.wishlistLabel}>{wl.title}</p>
+                  <p className={styles.wishlistDescription}>{wl.description}</p>
+                </div>
+              );
+            })}
           </div>
           {showArrows && (
             <img

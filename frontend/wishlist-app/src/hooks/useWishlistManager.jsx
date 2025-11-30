@@ -10,66 +10,113 @@ export default function useWishlistManager() {
     title,
     description,
     wishlist_id,
-    items,
+    items = [],
+    wishlistCover = null,
   }) => {
     setLoading(true);
     setError(null);
 
     try {
-      let savedWishlist;
+      let savedWishlist = null;
 
       if (wishlist_id) {
-        const res = await fetch(
+        const resCheck = await fetch(
           `${import.meta.env.VITE_API_URL}/wishlists/${wishlist_id}`,
           {
             credentials: 'include',
           }
         );
-        if (res.ok) {
-          savedWishlist = await res.json();
-        } else if (res.status === 404) {
+        if (resCheck.ok) {
+          savedWishlist = await resCheck.json();
+        } else if (resCheck.status === 404) {
           wishlist_id = null;
         } else {
           throw new Error('Failed to check wishlist existence');
         }
       }
-
       if (!wishlist_id) {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/wishlists`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, description }),
-        });
-
-        if (!res.ok) throw new Error('Wishlist creation failed');
-        savedWishlist = await res.json();
-      }
-
-      const savedItems = [];
-      if (Array.isArray(items) && items.length > 0) {
-        for (const item of items) {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/items`, {
+        const resCreate = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists`,
+          {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              wishlist_id: savedWishlist.id,
-              name: item.name,
-              price: Number(item.price) || 0,
-              link: item.link,
-            }),
-          });
-
-          if (res.ok) savedItems.push(await res.json());
-          else console.warn('Item not saved', item);
+            body: JSON.stringify({ title, description }),
+          }
+        );
+        if (!resCreate.ok) {
+          const txt = await resCreate.text();
+          throw new Error('Wishlist creation failed: ' + txt);
         }
+        savedWishlist = await resCreate.json();
+      }
+
+      if (wishlistCover) {
+        const fd = new FormData();
+        fd.append('cover', wishlistCover);
+
+        const resCover = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists/${savedWishlist.id}/cover`,
+          { method: 'POST', credentials: 'include', body: fd }
+        );
+        if (resCover.ok) {
+          const coverData = await resCover.json();
+          savedWishlist.cover = coverData.cover;
+        } else {
+          console.warn('Wishlist cover upload failed');
+        }
+      }
+
+      const savedItems = [];
+      for (const it of items) {
+        let saved = null;
+
+        const resCreate = await fetch(`${import.meta.env.VITE_API_URL}/items`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wishlist_id: savedWishlist.id,
+            name: it.name,
+            price: Number(it.price) || 0,
+            link: it.link || null,
+          }),
+        });
+
+        if (resCreate.ok) saved = await resCreate.json();
+        else {
+          console.warn('Failed to create item:', it.name);
+          continue;
+        }
+
+        if (saved && it.imageFile) {
+          const fd2 = new FormData();
+          fd2.append('cover', it.imageFile);
+
+          const upload = await fetch(
+            `${import.meta.env.VITE_API_URL}/items/cover/${saved.id}`,
+            {
+              method: 'POST',
+              credentials: 'include',
+              body: fd2,
+            }
+          );
+
+          if (upload.ok) {
+            const upData = await upload.json();
+            saved.cover = upData.cover;
+          } else {
+            console.warn('Item cover upload failed for item id', saved.id);
+          }
+        }
+
+        savedItems.push(saved);
       }
 
       return { wishlist: savedWishlist, items: savedItems };
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Server unavailable');
+      setError(err.message || 'Server error');
       return null;
     } finally {
       setLoading(false);
