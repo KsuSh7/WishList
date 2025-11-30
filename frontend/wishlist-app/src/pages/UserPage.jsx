@@ -16,7 +16,8 @@ export default function UserPage() {
 
   const searchParams = new URLSearchParams(location.search);
   const shareId = searchParams.get('share_id');
-  const ownerView = !shareId || (authUser && authUser.id === shareId);
+
+  const ownerView = !shareId && authUser;
   const userIdToFetch = shareId || (authUser ? authUser.id : null);
 
   const fetchUrl = userIdToFetch
@@ -33,7 +34,7 @@ export default function UserPage() {
     if (!loading && ownerView && !authUser) navigate('/auth');
   }, [loading, authUser]);
 
-  if (loading || (ownerView && !authUser) || wishlistsLoading) {
+  if (loading || wishlistsLoading) {
     return (
       <div className={styles.loadingContainer}>
         <img src={SpinnerIcon} alt="loading" className={styles.svgSpinner} />
@@ -81,15 +82,7 @@ export default function UserPage() {
       if (!res.ok) throw new Error('Upload failed');
 
       const data = await res.json();
-
-      console.log('Avatar server response:', data);
-
-      updateUser((prev) => ({
-        ...prev,
-        avatar: data.avatar,
-      }));
-
-      window.location.reload();
+      updateUser((prev) => ({ ...prev, avatar: data.avatar }));
 
       alert('Avatar updated!');
     } catch (err) {
@@ -102,12 +95,16 @@ export default function UserPage() {
     <div className={styles.container}>
       <div className={styles.profile}>
         <div className={styles.avatarBlock}>
-          {authUser.avatar ? (
-            <img
-              src={`${import.meta.env.VITE_API_URL}${authUser.avatar}`}
-              alt="avatar"
-              className={styles.avatarImage}
-            />
+          {userIdToFetch && userIdToFetch === (authUser?.id || shareId) ? (
+            authUser?.avatar ? (
+              <img
+                src={`${import.meta.env.VITE_API_URL}${authUser.avatar}`}
+                alt="avatar"
+                className={styles.avatarImage}
+              />
+            ) : (
+              <div className={styles.avatarPlaceholder}></div>
+            )
           ) : (
             <div className={styles.avatarPlaceholder}></div>
           )}
@@ -174,32 +171,27 @@ export default function UserPage() {
             />
           )}
           <div className={styles.wishlistList}>
-            {visibleWishlists.map((wl) => {
-              console.log('Wishlist:', wl);
-              console.log('Cover value:', wl.cover);
-
-              return (
-                <div key={wl.id} className={styles.wishlistCard}>
-                  <Link
-                    to={`/wishlist/${wl.id}`}
-                    className={styles.wishlistLink}
-                    state={ownerView && authUser ? { wishlist: wl } : {}}
-                  >
-                    {wl.cover ? (
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}${wl.cover}`}
-                        alt={wl.title}
-                        className={styles.wishlistImage}
-                      />
-                    ) : (
-                      <div className={styles.coverPlaceholder}></div>
-                    )}
-                  </Link>
-                  <p className={styles.wishlistLabel}>{wl.title}</p>
-                  <p className={styles.wishlistDescription}>{wl.description}</p>
-                </div>
-              );
-            })}
+            {visibleWishlists.map((wl) => (
+              <div key={wl.id} className={styles.wishlistCard}>
+                <Link
+                  to={`/wishlist/${wl.id}`}
+                  className={styles.wishlistLink}
+                  state={ownerView && authUser ? { wishlist: wl } : {}}
+                >
+                  {wl.cover ? (
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}${wl.cover}`}
+                      alt={wl.title}
+                      className={styles.wishlistImage}
+                    />
+                  ) : (
+                    <div className={styles.coverPlaceholder}></div>
+                  )}
+                </Link>
+                <p className={styles.wishlistLabel}>{wl.title}</p>
+                <p className={styles.wishlistDescription}>{wl.description}</p>
+              </div>
+            ))}
           </div>
           {showArrows && (
             <img
