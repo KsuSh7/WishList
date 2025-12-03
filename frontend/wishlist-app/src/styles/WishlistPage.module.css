@@ -4,6 +4,7 @@
   flex-direction: column;
   align-items: center;
   gap: 48px;
+  min-height: 100vh;
 }
 
 .header {
@@ -42,11 +43,27 @@
 }
 
 .itemImage {
-  width: 100%;
-  min-height: 436px;
-  background-color: #FFB4A2;
+  height: 100%;
+  height: 436px;
   border-radius: 14px;
+  overflow: hidden;
+  background-color: #FFB4A2;
+  position: relative;
 }
+
+.itemCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.itemPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: #FFB4A2;
+}
+
 
 .itemInfo {
   display: flex;
@@ -103,10 +120,38 @@
 .deleteWishlist {
   background-color: #FFCDB2;
   color: #6D6875;
-  z-index: 1;
 }
 
 .deleteWishlist:hover {
   background-color: #B5838D;
   color: #FFCDB2;
+}
+
+.buttonsGroup {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    align-items: center;
+}
+.addItemButton, .deleteWishlist{
+  margin: 6px;
+}
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.svgSpinner {
+  width: 50px;
+  height: 50px;
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }

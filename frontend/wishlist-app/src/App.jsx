@@ -6,23 +6,31 @@ import Home from './pages/Home';
 import Auth from './pages/Auth';
 import UserPage from './pages/UserPage';
 import WishlistPage from './pages/WishlistPage';
+import NotFound from './pages/NotFound';
+import AddWishlist from './pages/AddWishlist';
+import AddItem from './pages/AddItem';
+import { AuthProvider } from './hooks/useAuth';
 
 function App() {
   return (
-    <Router>
-      <BackgroundLogo />
-      <div className="appContainer">
+    <AuthProvider>
+      <Router>
         <BackgroundLogo />
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/user" element={<UserPage />} />
-          <Route path="/wishlist/:id" element={<WishlistPage />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+        <div className="appContainer">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/user" element={<UserPage />} />
+            <Route path="/wishlist/:id" element={<WishlistPage />} />
+            <Route path="/add-wishlist" element={<AddWishlist />} />
+            <Route path="/add-item" element={<AddItem />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

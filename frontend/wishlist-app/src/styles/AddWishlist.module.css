@@ -1,0 +1,147 @@
+.container {
+  display: flex;
+  gap: 40px;
+  padding: 20px;
+  height: 100vh;
+}
+
+.leftColumn {
+  width: 523px;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  margin-left: 40px;
+  z-index: 1;
+}
+
+.coverCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 160px;
+  width: 403px;
+  height: 453px;
+  background-color: #FFB4A2;  
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.coverImage {
+  height: 100%;
+}
+
+.coverImage img, 
+.coverPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: #FFCDB2;
+  border-radius: 12px;
+}
+
+.coverButton {
+  position: absolute;
+  bottom: 20px;
+  z-index: 2;
+
+  margin: 0;
+}
+
+
+h2 {
+    margin-top: 160px;
+    margin-bottom: 6px;
+}
+
+.rightColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  align-items: center;
+  z-index: 1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.inputGroupItems {
+    display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+label {
+  align-items: start;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #000;
+}
+
+.inputGroup input, .inputGroupItems input {
+  align-items: center;  
+  background-color: #FFCDB2;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: normal;
+  box-sizing: border-box;
+  margin-bottom: 62px;
+  width: 100%;
+}
+
+
+
+.itemsInput {
+    margin-bottom: 27px !important;
+}
+
+.addItemButton {
+    font-size: 24px;
+    margin: 6px;
+}
+
+.backLink {
+  text-decoration: none;
+  font-size: 16px;
+  color: #000000;
+  font-weight: normal;
+  margin-top: 6px;
+  transition: color 0.3s ease;
+}
+.backLink:hover {
+  color: #FFCDB2;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.addFinalItemButton {
+  font-size: 24px;
+    margin: 6px;
+    background-color: #FFCDB2;
+    color: #6D6875;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.addFinalItemButton:hover {
+    background-color: #B5838D;
+    color: #FFCDB2;
+}
