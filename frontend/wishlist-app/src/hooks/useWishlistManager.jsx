@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from './useAuth';
 
 export default function useWishlistManager() {
-  const { user } = useAuth();
+  const { user } = useAuth() || {};
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 

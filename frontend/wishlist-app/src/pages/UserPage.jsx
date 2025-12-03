@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import useFetchData from '../hooks/useFetchData';
 
 export default function UserPage() {
-  const { user: authUser, updateUser, loading } = useAuth();
+  const { user: authUser, updateUser, loading } = useAuth() || {};
   const navigate = useNavigate();
   const location = useLocation();
   const [startIndex, setStartIndex] = useState(0);

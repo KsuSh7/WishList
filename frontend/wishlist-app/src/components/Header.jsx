@@ -4,7 +4,7 @@ import logo from '../assets/vec_full_black_lightstar.svg';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Header() {
-  const { user: authUser, isAuthenticated, logout, loading } = useAuth();
+  const { user: authUser, isAuthenticated, logout, loading } = useAuth() || {};
   const navigate = useNavigate();
 
   if (loading) {
