@@ -2,114 +2,122 @@ import { useState } from 'react';
 import { useAuth } from './useAuth';
 
 export default function useWishlistManager() {
-  const { user } = useAuth();
+  const { user } = useAuth() || {};
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const createOrUpdateWishlist = async ({
     title,
     description,
-    wishlistId,
-    items,
+    wishlist_id,
+    items = [],
+    wishlistCover = null,
   }) => {
     setLoading(true);
     setError(null);
 
-    let currentWishlistId = wishlistId || Date.now() + Math.random();
-
-    let updatedWishlist = {
-      id: currentWishlistId,
-      title,
-      description,
-      userId: user?.id,
-    };
-
     try {
-      if (wishlistId === undefined) {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/wishlists`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title,
-            description,
-            userId: user?.id,
-          }),
-        });
+      let savedWishlist = null;
 
-        if (!res.ok) throw new Error('Server not available');
-        updatedWishlist = await res.json();
-        currentWishlistId = updatedWishlist.id;
+      if (wishlist_id) {
+        const resCheck = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists/${wishlist_id}`,
+          {
+            credentials: 'include',
+          }
+        );
+        if (resCheck.ok) {
+          savedWishlist = await resCheck.json();
+        } else if (resCheck.status === 404) {
+          wishlist_id = null;
+        } else {
+          throw new Error('Failed to check wishlist existence');
+        }
+      }
+      if (!wishlist_id) {
+        const resCreate = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description }),
+          }
+        );
+        if (!resCreate.ok) {
+          const txt = await resCreate.text();
+          throw new Error('Wishlist creation failed: ' + txt);
+        }
+        savedWishlist = await resCreate.json();
       }
 
-      const savedItems = [];
+      if (wishlistCover) {
+        const fd = new FormData();
+        fd.append('cover', wishlistCover);
 
-      for (const item of items) {
-        try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/items`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...item,
-              wishlistId: currentWishlistId,
-              userId: user?.id,
-            }),
-          });
-
-          if (!res.ok) throw new Error();
-          savedItems.push(await res.json());
-        } catch {
-          savedItems.push({
-            ...item,
-            id: Date.now() + Math.random(),
-            wishlistId: currentWishlistId,
-            userId: user?.id,
-          });
+        const resCover = await fetch(
+          `${import.meta.env.VITE_API_URL}/wishlists/${savedWishlist.id}/cover`,
+          { method: 'POST', credentials: 'include', body: fd }
+        );
+        if (resCover.ok) {
+          const coverData = await resCover.json();
+          savedWishlist.cover = coverData.cover;
+        } else {
+          console.warn('Wishlist cover upload failed');
         }
       }
 
-      localStorage.setItem(
-        `wishlist-${currentWishlistId}`,
-        JSON.stringify(updatedWishlist)
-      );
-      localStorage.setItem(
-        `items-${currentWishlistId}`,
-        JSON.stringify(savedItems)
-      );
+      const savedItems = [];
+      for (const it of items) {
+        let saved = null;
 
-      const allWishlists = JSON.parse(
-        localStorage.getItem('wishlists') || '[]'
-      );
+        const resCreate = await fetch(`${import.meta.env.VITE_API_URL}/items`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wishlist_id: savedWishlist.id,
+            name: it.name,
+            price: Number(it.price) || 0,
+            link: it.link || null,
+          }),
+        });
 
-      if (!allWishlists.find((wl) => wl.id === currentWishlistId)) {
-        allWishlists.push(updatedWishlist);
+        if (resCreate.ok) saved = await resCreate.json();
+        else {
+          console.warn('Failed to create item:', it.name);
+          continue;
+        }
+
+        if (saved && it.imageFile) {
+          const fd2 = new FormData();
+          fd2.append('cover', it.imageFile);
+
+          const upload = await fetch(
+            `${import.meta.env.VITE_API_URL}/items/cover/${saved.id}`,
+            {
+              method: 'POST',
+              credentials: 'include',
+              body: fd2,
+            }
+          );
+
+          if (upload.ok) {
+            const upData = await upload.json();
+            saved.cover = upData.cover;
+          } else {
+            console.warn('Item cover upload failed for item id', saved.id);
+          }
+        }
+
+        savedItems.push(saved);
       }
 
-      localStorage.setItem('wishlists', JSON.stringify(allWishlists));
-
-      return { wishlist: updatedWishlist, items: savedItems };
+      return { wishlist: savedWishlist, items: savedItems };
     } catch (err) {
-      setError('Server not available — saved locally.');
-
-      updatedWishlist.userId = user?.id;
-
-      localStorage.setItem(
-        `wishlist-${currentWishlistId}`,
-        JSON.stringify(updatedWishlist)
-      );
-      localStorage.setItem(
-        `items-${currentWishlistId}`,
-        JSON.stringify(items.map((i) => ({ ...i, userId: user?.id })))
-      );
-
-      const allWishlists = JSON.parse(
-        localStorage.getItem('wishlists') || '[]'
-      );
-      if (!allWishlists.find((wl) => wl.id === currentWishlistId)) {
-        allWishlists.push(updatedWishlist);
-      }
-      localStorage.setItem('wishlists', JSON.stringify(allWishlists));
-
-      return { wishlist: updatedWishlist, items };
+      console.error(err);
+      setError(err.message || 'Server error');
+      return null;
     } finally {
       setLoading(false);
     }

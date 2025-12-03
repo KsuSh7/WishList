@@ -7,6 +7,22 @@
       "password": "qwerty123"
     }
   ],
-  "wishlists": [],
-  "items": []
+  "wishlists": [
+    {
+      "id": "5258",
+      "title": "Test",
+      "description": "Test test test",
+      "userId": "3175"
+    }
+  ],
+  "items": [
+    {
+      "id": "e0c3",
+      "name": "test2",
+      "price": "222",
+      "link": "https://github.com/KsuSh7/WishList/tree/lab6",
+      "wishlistId": "5258",
+      "userId": "3175"
+    }
+  ]
 }

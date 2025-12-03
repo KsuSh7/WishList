@@ -43,11 +43,27 @@
 }
 
 .itemImage {
-  width: 100%;
-  min-height: 436px;
-  background-color: #FFB4A2;
+  height: 100%;
+  height: 436px;
   border-radius: 14px;
+  overflow: hidden;
+  background-color: #FFB4A2;
+  position: relative;
 }
+
+.itemCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.itemPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: #FFB4A2;
+}
+
 
 .itemInfo {
   display: flex;

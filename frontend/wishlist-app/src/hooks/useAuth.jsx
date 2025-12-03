@@ -4,70 +4,84 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
+        }
+      } catch {}
+      setLoading(false);
+    };
+    fetchProfile();
   }, []);
 
   const login = async (email, password) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?email=${email}&password=${password}`
-    );
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
 
-    if (!res.ok) throw new Error('Server error');
-
-    const users = await res.json();
-
-    if (users.length === 0) {
-      throw new Error('Invalid email or password');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Invalid credentials');
     }
 
-    const foundUser = users[0];
-
-    localStorage.setItem('user', JSON.stringify(foundUser));
-    setUser(foundUser);
-
-    return foundUser;
+    const data = await res.json();
+    setUser(data.user);
+    return data.user;
   };
 
   const signup = async (username, email, password) => {
-    const newUser = { username, email, password };
-
-    const existing = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?email=${email}`
-    );
-    const exists = await existing.json();
-    if (exists.length > 0) {
-      throw new Error('User with this email already exists');
-    }
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newUser),
+      credentials: 'include',
+      body: JSON.stringify({ username, email, password }),
     });
 
-    if (!res.ok) throw new Error('Signup failed');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Signup failed');
+    }
 
-    const createdUser = await res.json();
-
-    localStorage.setItem('user', JSON.stringify(createdUser));
-    setUser(createdUser);
-
-    return createdUser;
+    const data = await res.json();
+    setUser(data.user);
+    return data.user;
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
+  const logout = async () => {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     setUser(null);
   };
-
-  const isAuthenticated = !!user;
+  const updateUser = (newData) => {
+    setUser((prev) => ({ ...prev, ...newData }));
+    console.log('authUser after update:', user);
+  };
 
   return (
     <AuthContext.Provider
-      value={{ user, login, signup, logout, isAuthenticated }}
+      value={{
+        user,
+        isAuthenticated: !!user,
+        login,
+        signup,
+        logout,
+        updateUser,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>
