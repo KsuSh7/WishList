@@ -58,18 +58,33 @@ describe('Auth (e2e)', () => {
   });
 
   it('logs in successfully and navigates to /user', () => {
-    cy.intercept('POST', '/api/login', {
-      statusCode: 200,
-      body: { ok: true, user: { id: 1, username: 'TestUser', email: 'test@example.com' } },
-    }).as('loginRequest');
+    // Інтерцепт до кліку
+    cy.intercept('POST', '**/api/login', (req) => {
+        expect(req.body).to.have.property('email', 'test@example.com')
+        expect(req.body).to.have.property('password', 'qw123456')
 
-    cy.get('input[type="email"]').type('test@example.com');
-    cy.get('input[type="password"]').type('123456');
+        req.reply({
+        statusCode: 200,
+        body: {
+            ok: true,
+            user: {
+            id: 1,
+            username: 'TestUser',
+            email: 'test@example.com',
+            avatar: null
+            }
+        }
+        })
+    }).as('loginRequest')
 
-    cy.get('button').contains("Let's go").click();
+    cy.get('input[type="email"]').clear().type('test@example.com')
+    cy.get('input[type="password"]').clear().type('qw123456')
 
-    cy.wait('@loginRequest');
+    cy.get('button').contains("Let's go").click()
 
-    cy.url().should('include', '/user');
-  });
+    cy.wait('@loginRequest') // чекаємо на інтерцепт
+
+    cy.url().should('include', '/user')
+    })
+
 });

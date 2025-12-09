@@ -2,23 +2,15 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import istanbul from 'vite-plugin-istanbul'
 
-
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     istanbul({
-      include: 'src/**/*',
+      include: 'src/**/*.{js,jsx}',
       exclude: ['node_modules', 'cypress'],
       extension: ['.js', '.jsx'],
+      cypress: true,
+      requireEnv: false,
     }),
   ],
-  resolve: {
-    alias: {
-      '../hooks/useAuth': '/cypress/mocks/useAuth.jsx',
-      '../hooks/useFetchData': '/cypress/mocks/useFetchData.jsx',
-    },
-  },
-
 })
-
