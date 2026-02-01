@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs';
 
 import * as dbUsers from './db/users.js';
-import { pool } from './db/index.js'; // тут має бути Pool PostgreSQL
+import { pool } from './db/index.js';
 import { loggerOptions } from './config/logger.js';
 import { sessionOptions } from './config/session.js';
 import { requireAuth } from './middlewares/auth.js';
@@ -31,7 +31,6 @@ app.use(pinoHttp(loggerOptions));
 app.use(session(sessionOptions));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Multer storage для аватарок та обкладинок
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = './uploads/avatars';
