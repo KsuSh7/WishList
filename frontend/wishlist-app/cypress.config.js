@@ -8,13 +8,7 @@ export default defineConfig({
       framework: 'react',
       bundler: 'vite',
       viteConfig: {
-        plugins: [react()],
-        resolve: {
-          alias: {
-            '../hooks/useAuth': '/cypress/mocks/useAuth.jsx',
-            '../hooks/useFetchData': '/cypress/mocks/useFetchData.jsx',
-          },
-        },
+        plugins: [react()]
       },
     },
     setupNodeEvents(on, config) {
