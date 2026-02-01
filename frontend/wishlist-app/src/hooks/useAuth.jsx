@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,15 +11,24 @@ export function AuthProvider({ children }) {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile`, {
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
         });
-        if (res.ok) {
-          const userData = await res.json();
-          setUser(userData);
+
+        if (!res.ok) {
+          // 🔴 КЛЮЧОВЕ
+          setUser(null);
+          return;
         }
-      } catch {}
-      setLoading(false);
+
+        const userData = await res.json();
+        setUser(userData);
+      } catch (err) {
+        // 🔴 network / CORS / server down
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchProfile();
   }, []);
 
@@ -66,9 +75,9 @@ export function AuthProvider({ children }) {
     });
     setUser(null);
   };
+
   const updateUser = (newData) => {
-    setUser((prev) => ({ ...prev, ...newData }));
-    console.log('authUser after update:', user);
+    setUser((prev) => (prev ? { ...prev, ...newData } : prev));
   };
 
   return (
