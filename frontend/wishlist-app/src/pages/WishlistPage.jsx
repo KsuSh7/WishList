@@ -7,7 +7,7 @@ import useFetchData from '../hooks/useFetchData';
 import SpinnerIcon from '../assets/spinner.svg';
 
 export default function WishlistPage() {
-  const { user: authUser } = useAuth();
+  const { user: authUser } = useAuth() || {};
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();

@@ -115,6 +115,7 @@ export default function AddItem() {
         <div className={styles.inputGroupItems}>
           <label>Item name</label>
           <input
+            data-testid="item-name"
             className={styles.itemsInput}
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -122,6 +123,7 @@ export default function AddItem() {
 
           <label>Price (optional)</label>
           <input
+            data-testid="item-price"
             className={styles.itemsInput}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
@@ -129,6 +131,7 @@ export default function AddItem() {
 
           <label>Link (optional)</label>
           <input
+            data-testid="item-link"
             className={styles.itemsInput}
             value={link}
             onChange={(e) => setLink(e.target.value)}

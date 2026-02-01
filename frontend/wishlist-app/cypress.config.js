@@ -1,10 +1,35 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress'
+import react from '@vitejs/plugin-react'
+import codeCoverageTask from '@cypress/code-coverage/task'
 
 export default defineConfig({
   component: {
     devServer: {
-      framework: "react",
-      bundler: "vite",
+      framework: 'react',
+      bundler: 'vite',
+      viteConfig: {
+        plugins: [react()],
+        resolve: {
+          alias: {
+            '../hooks/useAuth': '/cypress/mocks/useAuth.jsx',
+            '../hooks/useFetchData': '/cypress/mocks/useFetchData.jsx',
+          },
+        },
+      },
+    },
+    setupNodeEvents(on, config) {
+      codeCoverageTask(on, config)
+      return config
     },
   },
-});
+
+  e2e: {
+    baseUrl: 'http://localhost:5173',
+    supportFile: 'cypress/support/e2e.js',
+    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    setupNodeEvents(on, config) {
+      codeCoverageTask(on, config)
+      return config
+    },
+  },
+})
