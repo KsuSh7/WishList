@@ -1,4 +1,4 @@
-import { pool } from 'index.js';
+import { pool } from './index.js';
 
 export async function findUserByEmail(email) {
   const { rows } = await pool.query(
