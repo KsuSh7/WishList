@@ -23,8 +23,5 @@
       "eslint --fix",
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "pg": "^8.18.0"
   }
 }
