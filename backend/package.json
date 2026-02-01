@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node src/db/index.js",
+    "start": "node index.js",
     "build": "echo 'No build step for backend'"
   },
   "keywords": [],
